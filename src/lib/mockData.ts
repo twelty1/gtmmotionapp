@@ -4,6 +4,74 @@ import type { DiligenceReport, AnalysisSection } from '@/types/diligence';
 export function generateMockReport(companyName: string): DiligenceReport {
   const sections: AnalysisSection[] = [
     {
+      id: 'market-size',
+      title: 'Market Size',
+      status: 'unclear',
+      summary: 'Total addressable market shows promise but key sizing metrics require validation.',
+      insights: [
+        'TAM: Enterprise compliance software market estimated at $12B globally',
+        'Competitors\' Sales: Top 3 incumbents generate ~$2B combined annual revenue',
+        'Cost Savings: Customers report 60-80% reduction in manual compliance labor costs',
+        'Macro Market: Regulatory complexity increasing 15% YoY across industries',
+        'Market Trends: Shift toward automated, AI-driven compliance solutions accelerating',
+        'Niche and Platform: Initial focus on SaaS vertical with platform expansion potential',
+      ],
+      gaps: [
+        'SAM and SOM calculations not provided',
+        'Bottom-up market sizing methodology not documented',
+        'Competitor market share breakdown not mentioned',
+        'Geographic market breakdown not included',
+      ],
+      recommendations: [
+        'Commission independent market sizing study',
+        'Validate TAM with bottom-up customer count analysis',
+        'Map competitor revenue to addressable segments',
+      ],
+      assumptions: [
+        'TAM growth rate of 12% CAGR assumed',
+        'Adjacent market expansion included in projections',
+      ],
+      validatedSignals: [
+        'Gartner report on compliance software market',
+        'Public competitor financial disclosures',
+      ],
+    },
+    {
+      id: 'traction',
+      title: 'Traction',
+      status: 'pass',
+      summary: 'Strong early traction signals with paying customers and notable investor backing.',
+      insights: [
+        'Paying Customers: 8 paying enterprise customers with $50K+ ACV',
+        'Engagement Metrics: 85% weekly active usage, 4.2 NPS from pilot users',
+        'Letters of Intent (LOIs): 5 signed LOIs totaling $400K in potential ACV',
+        'Inferior Competition: Current solutions require 10x more implementation time',
+        'Seed Investors: Led by tier-1 VC with $3M seed round closed',
+        'Industry Validation: Featured in Gartner Cool Vendors report',
+      ],
+      gaps: [
+        'Month-over-month growth rate not mentioned',
+        'Churn/retention data not provided',
+        'Customer acquisition cost (CAC) not disclosed',
+        'Revenue run rate not specified',
+      ],
+      recommendations: [
+        'Track and report MoM growth metrics',
+        'Establish cohort retention analysis',
+        'Document CAC:LTV ratio progression',
+      ],
+      assumptions: [
+        'LOIs will convert at 60%+ rate',
+        'Current customers represent repeatable ICP',
+      ],
+      validatedSignals: [
+        'Signed customer contracts on file',
+        'Bank statements confirming revenue',
+        'Signed LOI documents',
+        'Seed round term sheet and close documentation',
+      ],
+    },
+    {
       id: 'customer-pain',
       title: 'Customer Pain & Urgency',
       status: 'pass',
