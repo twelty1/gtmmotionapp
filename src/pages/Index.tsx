@@ -177,24 +177,54 @@ const Index = () => {
               </div>
             </div>
 
-            {/* Value Proposition Analysis */}
-            <section>
-              <div className="flex items-center gap-2 mb-4">
-                <FileText className="w-5 h-5 text-primary" />
-                <h3 className="text-lg font-semibold text-foreground">
-                  Value Proposition Analysis
-                </h3>
-              </div>
-              <div className="space-y-3">
-                {report.sections.map((section, index) => (
-                  <AnalysisCard
-                    key={section.id}
-                    section={section}
-                    index={index}
-                  />
-                ))}
-              </div>
-            </section>
+            {/* Grouped Analysis Sections */}
+            {(['Value Proposition', 'Market Size', 'Traction'] as const).map((category) => {
+              const categorySections = report.sections.filter(s => s.category === category);
+              const categoryIcons = {
+                'Value Proposition': <FileText className="w-5 h-5 text-primary" />,
+                'Market Size': <BarChart3 className="w-5 h-5 text-primary" />,
+                'Traction': <Target className="w-5 h-5 text-primary" />,
+              };
+              const categoryPass = categorySections.filter(s => s.status === 'pass').length;
+              const categoryRisk = categorySections.filter(s => s.status === 'risk').length;
+              const categoryUnclear = categorySections.filter(s => s.status === 'unclear').length;
+
+              return (
+                <section key={category}>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      {categoryIcons[category]}
+                      <h3 className="text-lg font-semibold text-foreground">
+                        {category}
+                      </h3>
+                    </div>
+                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-status-pass" />
+                        {categoryPass}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <HelpCircle className="w-3.5 h-3.5 text-status-unclear" />
+                        {categoryUnclear}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <AlertCircle className="w-3.5 h-3.5 text-status-risk" />
+                        {categoryRisk}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    {categorySections.map((section, index) => (
+                      <AnalysisCard
+                        key={section.id}
+                        section={section}
+                        index={index}
+                      />
+                    ))}
+                  </div>
+                </section>
+              );
+            })}
 
             {/* Visualizations */}
             <section>
