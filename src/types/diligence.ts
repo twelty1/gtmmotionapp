@@ -12,6 +12,7 @@ export interface UploadedFile {
 export interface AnalysisSection {
   id: string;
   title: string;
+  category: 'Value Proposition' | 'Market Size' | 'Traction';
   status: AnalysisStatus;
   summary: string;
   insights: string[];
