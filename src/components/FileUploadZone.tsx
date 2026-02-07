@@ -10,6 +10,7 @@ interface FileUploadZoneProps {
   onFilesChange: (files: UploadedFile[]) => void;
   onStartAnalysis: () => void;
   isProcessing: boolean;
+  children?: React.ReactNode;
 }
 
 export function FileUploadZone({
@@ -17,6 +18,7 @@ export function FileUploadZone({
   onFilesChange,
   onStartAnalysis,
   isProcessing,
+  children,
 }: FileUploadZoneProps) {
   const [isDragActive, setIsDragActive] = useState(false);
 
@@ -67,7 +69,7 @@ export function FileUploadZone({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <div
         onDragOver={(e) => {
           e.preventDefault();
@@ -115,6 +117,8 @@ export function FileUploadZone({
           Supports PDF, DOC, DOCX, TXT, MD, PPT, PPTX
         </p>
       </div>
+
+      {children}
 
       {files.length > 0 && (
         <div className="space-y-2">

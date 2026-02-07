@@ -1,7 +1,8 @@
-import type { DiligenceReport, AnalysisSection } from '@/types/diligence';
+import type { DiligenceReport, AnalysisSection, BusinessModel, FunnelStage } from '@/types/diligence';
 
 // Mock data for demonstration - in production this would come from AI analysis
-export function generateMockReport(companyName: string): DiligenceReport {
+export function generateMockReport(companyName: string, businessModel: BusinessModel = 'B2B'): DiligenceReport {
+  const isB2B = businessModel === 'B2B';
   const sections: AnalysisSection[] = [
     // ── Value Proposition ──────────────────────────────────
     {
@@ -165,32 +166,63 @@ export function generateMockReport(companyName: string): DiligenceReport {
       id: 'gtm-motion',
       title: 'Push vs Pull GTM Motion',
       category: 'Value Proposition',
-      status: 'pass',
-      summary: 'Hybrid motion recommended with emphasis on product-led pull augmented by targeted outbound.',
-      insights: [
-        'Product has viral/shareable elements (compliance badges)',
-        'SEO and content showing early organic traction',
-        'Outbound required for enterprise segment',
-        'Current CAC:LTV ratio healthy at 1:4',
-      ],
-      gaps: [
-        'Channel partner strategy undeveloped',
-        'Self-serve conversion rate not tracked',
-        'Territory and account ownership unclear',
-      ],
-      recommendations: [
-        'Invest in product-led acquisition (freemium tier)',
-        'Build sales team for enterprise outbound only',
-        'Develop partner program for mid-market scale',
-      ],
-      assumptions: [
-        'PLG can work in compliance category',
-        'Content marketing will scale',
-      ],
-      validatedSignals: [
-        'Organic traffic up 300% QoQ',
-        '15% of trials convert without sales touch',
-      ],
+      status: isB2B ? 'pass' : 'pass',
+      summary: isB2B
+        ? 'Sales-led motion recommended with enterprise outbound as primary channel, supported by account-based marketing.'
+        : 'Digitally-led motion recommended with product-led growth as primary channel, supported by performance marketing.',
+      insights: isB2B
+        ? [
+            'Enterprise buyers require consultative sales approach',
+            'Account-based marketing showing strong pipeline influence',
+            'Sales cycle averages 3-6 months with multiple stakeholders',
+            'Current CAC:LTV ratio healthy at 1:4 with high ACV',
+          ]
+        : [
+            'Product has strong viral/shareable elements for organic growth',
+            'SEO and content showing strong organic acquisition traction',
+            'Self-serve conversion funnel optimized for low-touch onboarding',
+            'Current CAC:LTV ratio healthy at 1:5 with high volume',
+          ],
+      gaps: isB2B
+        ? [
+            'Channel partner strategy undeveloped',
+            'Territory and account ownership unclear',
+            'Sales enablement content gaps identified',
+          ]
+        : [
+            'Referral program not yet launched',
+            'Self-serve conversion rate optimization needed',
+            'Retention loop mechanics not fully built',
+          ],
+      recommendations: isB2B
+        ? [
+            'Build dedicated enterprise sales team with AE/SDR structure',
+            'Invest in ABM platform for top-of-funnel targeting',
+            'Develop partner channel for mid-market scale',
+          ]
+        : [
+            'Invest in product-led acquisition (freemium tier)',
+            'Scale performance marketing with CAC payback < 6 months',
+            'Build viral loops and referral incentives into product',
+          ],
+      assumptions: isB2B
+        ? [
+            'Enterprise deals will maintain current ACV levels',
+            'Sales team can be hired and ramped in 90 days',
+          ]
+        : [
+            'PLG can work in this category',
+            'Viral coefficient will exceed 1.0 with referral program',
+          ],
+      validatedSignals: isB2B
+        ? [
+            'Closed 8 enterprise deals through outbound motion',
+            'ABM campaigns showing 3x pipeline influence vs non-ABM',
+          ]
+        : [
+            'Organic traffic up 300% QoQ',
+            '15% of trials convert without sales touch',
+          ],
     },
 
     // ── Market Size ────────────────────────────────────────
@@ -514,18 +546,61 @@ export function generateMockReport(companyName: string): DiligenceReport {
     },
   ];
 
+  const acquisitionFunnel: FunnelStage[] = isB2B
+    ? [
+        { name: 'Target Accounts', value: 5000, percentage: 100 },
+        { name: 'Outreach / ABM', value: 2500, percentage: 50 },
+        { name: 'Discovery Calls', value: 500, percentage: 10 },
+        { name: 'Proposals Sent', value: 150, percentage: 3 },
+        { name: 'Negotiations', value: 60, percentage: 1.2 },
+        { name: 'Closed Won', value: 25, percentage: 0.5 },
+      ]
+    : [
+        { name: 'Website Visitors', value: 500000, percentage: 100 },
+        { name: 'Sign-ups', value: 50000, percentage: 10 },
+        { name: 'Activated Users', value: 15000, percentage: 3 },
+        { name: 'Trial Users', value: 7500, percentage: 1.5 },
+        { name: 'Paid Conversion', value: 2250, percentage: 0.45 },
+        { name: 'Retained (M3)', value: 1575, percentage: 0.32 },
+      ];
+
+  const gtmDecisions = isB2B
+    ? [
+        { factor: 'Brand Awareness', pushScore: 75, pullScore: 25 },
+        { factor: 'Sales Cycle', pushScore: 70, pullScore: 30 },
+        { factor: 'Product Complexity', pushScore: 65, pullScore: 35 },
+        { factor: 'Buyer Persona', pushScore: 60, pullScore: 40 },
+        { factor: 'Market Maturity', pushScore: 55, pullScore: 45 },
+      ]
+    : [
+        { factor: 'Brand Awareness', pushScore: 30, pullScore: 70 },
+        { factor: 'Sales Cycle', pushScore: 20, pullScore: 80 },
+        { factor: 'Product Complexity', pushScore: 35, pullScore: 65 },
+        { factor: 'Buyer Persona', pushScore: 25, pullScore: 75 },
+        { factor: 'Market Maturity', pushScore: 40, pullScore: 60 },
+      ];
+
   return {
     id: crypto.randomUUID(),
     createdAt: new Date(),
     status: 'complete',
     companyName,
+    businessModel,
     sections,
-    customerSegments: [
-      { name: 'Mid-Market SaaS', percentage: 45, urgency: 'high' },
-      { name: 'Enterprise FinServ', percentage: 30, urgency: 'medium' },
-      { name: 'Healthcare Tech', percentage: 15, urgency: 'high' },
-      { name: 'Other', percentage: 10, urgency: 'low' },
-    ],
+    customerSegments: isB2B
+      ? [
+          { name: 'Mid-Market SaaS', percentage: 45, urgency: 'high' },
+          { name: 'Enterprise FinServ', percentage: 30, urgency: 'medium' },
+          { name: 'Healthcare Tech', percentage: 15, urgency: 'high' },
+          { name: 'Other', percentage: 10, urgency: 'low' },
+        ]
+      : [
+          { name: 'Tech-Savvy Professionals', percentage: 35, urgency: 'high' },
+          { name: 'Small Business Owners', percentage: 25, urgency: 'medium' },
+          { name: 'Freelancers', percentage: 20, urgency: 'high' },
+          { name: 'Students', percentage: 12, urgency: 'low' },
+          { name: 'Other', percentage: 8, urgency: 'low' },
+        ],
     positioning: [
       { company: 'Target Company', innovation: 75, marketFit: 60, isTarget: true },
       { company: 'Incumbent A', innovation: 30, marketFit: 85 },
@@ -533,13 +608,8 @@ export function generateMockReport(companyName: string): DiligenceReport {
       { company: 'Startup X', innovation: 80, marketFit: 35 },
       { company: 'Startup Y', innovation: 65, marketFit: 45 },
     ],
-    gtmDecisions: [
-      { factor: 'Brand Awareness', pushScore: 70, pullScore: 30 },
-      { factor: 'Sales Cycle', pushScore: 40, pullScore: 60 },
-      { factor: 'Product Complexity', pushScore: 55, pullScore: 45 },
-      { factor: 'Buyer Persona', pushScore: 35, pullScore: 65 },
-      { factor: 'Market Maturity', pushScore: 60, pullScore: 40 },
-    ],
+    gtmDecisions,
     disruptionScore: 62,
+    acquisitionFunnel,
   };
 }

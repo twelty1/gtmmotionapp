@@ -41,14 +41,24 @@ export interface GTMDecision {
   pullScore: number;
 }
 
+export type BusinessModel = 'B2B' | 'B2C';
+
+export interface FunnelStage {
+  name: string;
+  value: number;
+  percentage: number;
+}
+
 export interface DiligenceReport {
   id: string;
   createdAt: Date;
   status: 'processing' | 'complete' | 'error';
   companyName: string;
+  businessModel: BusinessModel;
   sections: AnalysisSection[];
   customerSegments: CustomerSegment[];
   positioning: PositioningData[];
   gtmDecisions: GTMDecision[];
   disruptionScore: number;
+  acquisitionFunnel: FunnelStage[];
 }
