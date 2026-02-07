@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { FileUploadZone } from '@/components/FileUploadZone';
+import { BusinessModelToggle } from '@/components/BusinessModelToggle';
 import { AnalysisCard } from '@/components/AnalysisCard';
 import { SegmentationChart } from '@/components/charts/SegmentationChart';
 import { PositioningMap } from '@/components/charts/PositioningMap';
 import { GTMDecisionChart } from '@/components/charts/GTMDecisionChart';
 import { DisruptionSpectrum } from '@/components/charts/DisruptionSpectrum';
+import { AcquisitionFunnel } from '@/components/charts/AcquisitionFunnel';
 import { StatusBadge } from '@/components/StatusBadge';
 import { generateMockReport } from '@/lib/mockData';
 import { Button } from '@/components/ui/button';
@@ -20,10 +22,11 @@ import {
   Loader2,
   Target,
 } from 'lucide-react';
-import type { UploadedFile, DiligenceReport } from '@/types/diligence';
+import type { UploadedFile, DiligenceReport, BusinessModel } from '@/types/diligence';
 
 const Index = () => {
   const [files, setFiles] = useState<UploadedFile[]>([]);
+  const [businessModel, setBusinessModel] = useState<BusinessModel>('B2B');
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingProgress, setProcessingProgress] = useState(0);
   const [report, setReport] = useState<DiligenceReport | null>(null);
@@ -47,7 +50,7 @@ const Index = () => {
     }
 
     await new Promise((r) => setTimeout(r, 500));
-    setReport(generateMockReport('TechCorp AI'));
+    setReport(generateMockReport('TechCorp AI', businessModel));
     setIsProcessing(false);
   };
 
@@ -119,7 +122,12 @@ const Index = () => {
               onFilesChange={setFiles}
               onStartAnalysis={handleStartAnalysis}
               isProcessing={isProcessing}
-            />
+            >
+              <BusinessModelToggle
+                value={businessModel}
+                onChange={setBusinessModel}
+              />
+            </FileUploadZone>
           </div>
         )}
 
@@ -235,6 +243,10 @@ const Index = () => {
                 </h3>
               </div>
               <div className="grid lg:grid-cols-2 gap-6">
+                <AcquisitionFunnel
+                  data={report.acquisitionFunnel}
+                  businessModel={report.businessModel}
+                />
                 <SegmentationChart data={report.customerSegments} />
                 <PositioningMap data={report.positioning} />
                 <GTMDecisionChart data={report.gtmDecisions} />
