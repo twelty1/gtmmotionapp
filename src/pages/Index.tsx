@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { FileUploadZone } from '@/components/FileUploadZone';
 import { BusinessModelToggle } from '@/components/BusinessModelToggle';
@@ -8,7 +8,6 @@ import { PositioningMap } from '@/components/charts/PositioningMap';
 import { GTMDecisionChart } from '@/components/charts/GTMDecisionChart';
 import { DisruptionSpectrum } from '@/components/charts/DisruptionSpectrum';
 import { AcquisitionFunnel } from '@/components/charts/AcquisitionFunnel';
-import { StatusBadge } from '@/components/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
@@ -21,6 +20,7 @@ import {
   HelpCircle,
   Loader2,
   Target,
+  TrendingUp,
 } from 'lucide-react';
 import type { UploadedFile, DiligenceReport, BusinessModel } from '@/types/diligence';
 
@@ -48,35 +48,25 @@ const Index = () => {
       toast({ title: 'No files', description: 'Please upload materials first.', variant: 'destructive' });
       return;
     }
-
     setIsProcessing(true);
     setProcessingProgress(0);
     setProcessingLabel('Reading documents...');
-
     try {
-      // Step 1: Read file contents
       setProcessingProgress(15);
       setProcessingLabel('Extracting text from documents...');
       const documentTexts: string[] = [];
       for (const file of rawFiles) {
         try {
           const text = await readFileAsText(file);
-          if (text.trim()) {
-            documentTexts.push(`--- ${file.name} ---\n${text}`);
-          }
+          if (text.trim()) documentTexts.push(`--- ${file.name} ---\n${text}`);
         } catch {
-          documentTexts.push(`--- ${file.name} --- [Could not extract text from this file format]`);
+          documentTexts.push(`--- ${file.name} --- [Could not extract text]`);
         }
       }
+      if (documentTexts.length === 0) throw new Error('Could not extract text from any uploaded files.');
 
-      if (documentTexts.length === 0) {
-        throw new Error('Could not extract text from any uploaded files.');
-      }
-
-      // Step 2: Call AI analysis
       setProcessingProgress(30);
       setProcessingLabel('Analyzing materials with AI...');
-
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/analyze-documents`,
         {
@@ -88,21 +78,15 @@ const Index = () => {
           body: JSON.stringify({ documentTexts, businessModel }),
         }
       );
-
       setProcessingProgress(70);
       setProcessingLabel('Processing GTM insights...');
-
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.error || `Analysis failed (${response.status})`);
       }
-
       const aiReport = await response.json();
-
       setProcessingProgress(90);
       setProcessingLabel('Building report...');
-
-      // Build the final report
       const finalReport: DiligenceReport = {
         id: crypto.randomUUID(),
         createdAt: new Date(),
@@ -116,7 +100,6 @@ const Index = () => {
         disruptionScore: aiReport.disruptionScore || 0,
         acquisitionFunnel: aiReport.acquisitionFunnel || [],
       };
-
       setProcessingProgress(100);
       setProcessingLabel('Complete!');
       await new Promise((r) => setTimeout(r, 500));
@@ -125,7 +108,7 @@ const Index = () => {
       console.error('Analysis error:', error);
       toast({
         title: 'Analysis Failed',
-        description: error instanceof Error ? error.message : 'Something went wrong. Please try again.',
+        description: error instanceof Error ? error.message : 'Something went wrong.',
         variant: 'destructive',
       });
     } finally {
@@ -140,9 +123,7 @@ const Index = () => {
 
   const handleFilesChange = (uploadedFiles: UploadedFile[], nativeFiles?: File[]) => {
     setFiles(uploadedFiles);
-    if (nativeFiles) {
-      setRawFiles(nativeFiles);
-    }
+    if (nativeFiles) setRawFiles(nativeFiles);
   };
 
   const getStatusCounts = () => {
@@ -158,6 +139,12 @@ const Index = () => {
 
   const statusCounts = getStatusCounts();
 
+  const categoryConfig = {
+    'Value Proposition': { icon: <FileText className="w-5 h-5" />, description: 'Analysis of core value drivers, differentiation, and go-to-market positioning' },
+    'Market Size': { icon: <TrendingUp className="w-5 h-5" />, description: 'Market opportunity assessment including TAM, competitive landscape, and trends' },
+    'Traction': { icon: <Target className="w-5 h-5" />, description: 'Evidence of product-market fit through customers, engagement, and validation signals' },
+  } as const;
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -169,22 +156,14 @@ const Index = () => {
                 <Target className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <h1 className="text-lg font-semibold text-foreground">
-                  VC Diligence Platform
-                </h1>
-                <p className="text-sm text-muted-foreground">
-                  GTM & Product-Market Fit Analysis
-                </p>
+                <h1 className="text-lg font-semibold text-foreground">VC Diligence Platform</h1>
+                <p className="text-sm text-muted-foreground">GTM & Product-Market Fit Analysis</p>
               </div>
             </div>
             {report && (
-              <Button
-                variant="outline"
-                onClick={handleRegenerate}
-                className="gap-2"
-              >
+              <Button variant="outline" onClick={handleRegenerate} className="gap-2">
                 <RefreshCw className="w-4 h-4" />
-                Regenerate Analysis
+                Regenerate
               </Button>
             )}
           </div>
@@ -192,195 +171,140 @@ const Index = () => {
       </header>
 
       <main className="container mx-auto px-4 py-8">
+        {/* Upload State */}
         {!report && !isProcessing && (
           <div className="max-w-2xl mx-auto">
             <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-foreground mb-2">
-                Upload Investment Materials
-              </h2>
+              <h2 className="text-2xl font-bold text-foreground mb-2">Upload Investment Materials</h2>
               <p className="text-muted-foreground">
-                Upload pitch decks, memos, transcripts, and documents to generate
-                a comprehensive GTM and PMF analysis for the company.
+                Upload pitch decks, memos, transcripts, and documents to generate a comprehensive GTM and PMF analysis.
               </p>
             </div>
-            <FileUploadZone
-              files={files}
-              onFilesChange={handleFilesChange}
-              onStartAnalysis={handleStartAnalysis}
-              isProcessing={isProcessing}
-            >
-              <BusinessModelToggle
-                value={businessModel}
-                onChange={setBusinessModel}
-              />
+            <FileUploadZone files={files} onFilesChange={handleFilesChange} onStartAnalysis={handleStartAnalysis} isProcessing={isProcessing}>
+              <BusinessModelToggle value={businessModel} onChange={setBusinessModel} />
             </FileUploadZone>
           </div>
         )}
 
+        {/* Processing State */}
         {isProcessing && (
           <div className="max-w-md mx-auto text-center py-16">
             <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
               <Loader2 className="w-8 h-8 text-primary animate-spin" />
             </div>
-            <h2 className="text-xl font-semibold text-foreground mb-2">
-              Analyzing Materials
-            </h2>
-            <p className="text-muted-foreground mb-6">
-              {processingLabel}
-            </p>
+            <h2 className="text-xl font-semibold text-foreground mb-2">Analyzing Materials</h2>
+            <p className="text-muted-foreground mb-6">{processingLabel}</p>
             <Progress value={processingProgress} className="h-2" />
-            <p className="text-sm text-muted-foreground mt-2">
-              {processingProgress}% complete
-            </p>
+            <p className="text-sm text-muted-foreground mt-2">{processingProgress}% complete</p>
           </div>
         )}
 
+        {/* Report Output */}
         {report && (
-          <div className="space-y-8 animate-fade-in">
-            {/* Company Name Header */}
-            <div className="text-center pb-2 border-b border-border">
-              <h2 className="text-3xl font-bold text-foreground">
-                {report.companyName}
-              </h2>
-              <p className="text-muted-foreground mt-1">
-                {report.businessModel === 'B2B' ? 'Sales-Led' : 'Digitally-Led'} GTM Strategy • Generated{' '}
-                {report.createdAt.toLocaleDateString()}
+          <div className="max-w-4xl mx-auto animate-fade-in">
+            {/* Report Title Block */}
+            <div className="text-center mb-10 pb-8 border-b border-border">
+              <p className="text-xs font-semibold text-primary uppercase tracking-widest mb-2">Due Diligence Report</p>
+              <h2 className="text-4xl font-bold text-foreground mb-3">{report.companyName}</h2>
+              <p className="text-muted-foreground">
+                {report.businessModel === 'B2B' ? 'Sales-Led' : 'Digitally-Led'} GTM Strategy Analysis
+              </p>
+              <p className="text-xs text-muted-foreground mt-2">
+                Generated {report.createdAt.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
               </p>
             </div>
 
-            {/* Status Summary */}
-            <div className="flex items-center justify-center gap-6">
-              <div className="flex items-center gap-2 text-sm">
-                <CheckCircle2 className="w-4 h-4 text-status-pass" />
-                <span className="text-muted-foreground">
-                  {statusCounts.pass} Pass
-                </span>
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <HelpCircle className="w-4 h-4 text-status-unclear" />
-                <span className="text-muted-foreground">
-                  {statusCounts.unclear} Unclear
-                </span>
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <AlertCircle className="w-4 h-4 text-status-risk" />
-                <span className="text-muted-foreground">
-                  {statusCounts.risk} Risk
-                </span>
+            {/* Executive Summary Bar */}
+            <div className="bg-card border border-border rounded-lg p-5 mb-10">
+              <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-4">Executive Summary</h3>
+              <div className="grid grid-cols-3 gap-6">
+                <div className="text-center">
+                  <div className="flex items-center justify-center gap-2 mb-1">
+                    <CheckCircle2 className="w-5 h-5 text-[hsl(var(--status-pass))]" />
+                    <span className="text-2xl font-bold text-foreground">{statusCounts.pass}</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">Signals Validated</p>
+                </div>
+                <div className="text-center">
+                  <div className="flex items-center justify-center gap-2 mb-1">
+                    <HelpCircle className="w-5 h-5 text-[hsl(var(--status-unclear))]" />
+                    <span className="text-2xl font-bold text-foreground">{statusCounts.unclear}</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">Need More Data</p>
+                </div>
+                <div className="text-center">
+                  <div className="flex items-center justify-center gap-2 mb-1">
+                    <AlertCircle className="w-5 h-5 text-[hsl(var(--status-risk))]" />
+                    <span className="text-2xl font-bold text-foreground">{statusCounts.risk}</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">Risks Identified</p>
+                </div>
               </div>
             </div>
 
-            {/* Grouped Analysis Sections */}
-            {(['Value Proposition', 'Market Size', 'Traction'] as const).map((category) => {
+            {/* Category Sections with Inline Charts */}
+            {(['Value Proposition', 'Market Size', 'Traction'] as const).map((category, catIdx) => {
               const categorySections = report.sections.filter(s => s.category === category);
               if (categorySections.length === 0) return null;
-              const categoryIcons = {
-                'Value Proposition': <FileText className="w-5 h-5 text-primary" />,
-                'Market Size': <BarChart3 className="w-5 h-5 text-primary" />,
-                'Traction': <Target className="w-5 h-5 text-primary" />,
-              };
-              const categoryPass = categorySections.filter(s => s.status === 'pass').length;
-              const categoryRisk = categorySections.filter(s => s.status === 'risk').length;
-              const categoryUnclear = categorySections.filter(s => s.status === 'unclear').length;
+              const config = categoryConfig[category];
 
               return (
-                <section key={category}>
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-2">
-                      {categoryIcons[category]}
-                      <h3 className="text-lg font-semibold text-foreground">
-                        {category}
-                      </h3>
+                <section key={category} className="mb-12">
+                  {/* Category Header */}
+                  <div className="mb-6 pb-3 border-b border-border">
+                    <div className="flex items-center gap-3 mb-1">
+                      <div className="text-primary">{config.icon}</div>
+                      <h3 className="text-xl font-bold text-foreground">{category}</h3>
                     </div>
-                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-status-pass" />
-                        {categoryPass}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <HelpCircle className="w-3.5 h-3.5 text-status-unclear" />
-                        {categoryUnclear}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <AlertCircle className="w-3.5 h-3.5 text-status-risk" />
-                        {categoryRisk}
-                      </span>
-                    </div>
+                    <p className="text-sm text-muted-foreground ml-8">{config.description}</p>
                   </div>
-                  <div className="space-y-3">
+
+                  {/* Section Cards */}
+                  <div className="space-y-4 mb-6">
                     {categorySections.map((section, index) => (
-                      <AnalysisCard
-                        key={section.id}
-                        section={section}
-                        index={index}
-                      />
+                      <AnalysisCard key={section.id} section={section} index={index} />
                     ))}
                   </div>
+
+                  {/* Inline Visualizations per Category */}
+                  {category === 'Value Proposition' && (
+                    <div className="grid lg:grid-cols-2 gap-6 mt-6">
+                      {report.customerSegments.length > 0 && <SegmentationChart data={report.customerSegments} />}
+                      {report.gtmDecisions.length > 0 && <GTMDecisionChart data={report.gtmDecisions} />}
+                      {report.disruptionScore > 0 && <DisruptionSpectrum score={report.disruptionScore} />}
+                    </div>
+                  )}
+
+                  {category === 'Market Size' && report.positioning.length > 0 && (
+                    <div className="mt-6">
+                      <PositioningMap data={report.positioning} />
+                    </div>
+                  )}
+
+                  {category === 'Traction' && report.acquisitionFunnel.length > 0 && (
+                    <div className="mt-6">
+                      <AcquisitionFunnel data={report.acquisitionFunnel} businessModel={report.businessModel} />
+                    </div>
+                  )}
                 </section>
               );
             })}
 
-            {/* Visualizations */}
-            {(report.acquisitionFunnel.length > 0 || report.customerSegments.length > 0 || report.positioning.length > 0 || report.gtmDecisions.length > 0) && (
-              <section>
-                <div className="flex items-center gap-2 mb-4">
-                  <BarChart3 className="w-5 h-5 text-primary" />
-                  <h3 className="text-lg font-semibold text-foreground">
-                    Visual Analysis
-                  </h3>
-                </div>
-                <div className="grid lg:grid-cols-2 gap-6">
-                  {report.acquisitionFunnel.length > 0 && (
-                    <AcquisitionFunnel
-                      data={report.acquisitionFunnel}
-                      businessModel={report.businessModel}
-                    />
-                  )}
-                  {report.customerSegments.length > 0 && (
-                    <SegmentationChart data={report.customerSegments} />
-                  )}
-                  {report.positioning.length > 0 && (
-                    <PositioningMap data={report.positioning} />
-                  )}
-                  {report.gtmDecisions.length > 0 && (
-                    <GTMDecisionChart data={report.gtmDecisions} />
-                  )}
-                  {report.disruptionScore > 0 && (
-                    <DisruptionSpectrum score={report.disruptionScore} />
-                  )}
-                </div>
-              </section>
-            )}
-
-            {/* Add More Files */}
-            <section className="bg-card border border-border rounded-lg p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h3 className="font-semibold text-foreground">
-                    Add More Materials
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    Upload additional documents to refine the analysis
-                  </p>
-                </div>
+            {/* Add More Materials */}
+            <section className="bg-card border border-border rounded-lg p-6 mt-8">
+              <div className="mb-4">
+                <h3 className="font-semibold text-foreground">Refine This Analysis</h3>
+                <p className="text-sm text-muted-foreground">Upload additional materials to deepen the analysis</p>
               </div>
-              <FileUploadZone
-                files={files}
-                onFilesChange={handleFilesChange}
-                onStartAnalysis={handleRegenerate}
-                isProcessing={isProcessing}
-              />
+              <FileUploadZone files={files} onFilesChange={handleFilesChange} onStartAnalysis={handleRegenerate} isProcessing={isProcessing} />
             </section>
           </div>
         )}
       </main>
 
-      {/* Footer */}
       <footer className="border-t border-border mt-16">
         <div className="container mx-auto px-4 py-6">
-          <p className="text-sm text-muted-foreground text-center">
-            VC Diligence Platform • Investor-grade GTM & PMF Analysis
-          </p>
+          <p className="text-sm text-muted-foreground text-center">VC Diligence Platform • Investor-grade GTM & PMF Analysis</p>
         </div>
       </footer>
     </div>
