@@ -28,8 +28,8 @@ serve(async (req) => {
 
     let combinedText = documentTexts.join("\n\n---DOCUMENT SEPARATOR---\n\n");
     
-    // Truncate to ~800K characters (~200K tokens) to stay within context limits
-    const MAX_CHARS = 800000;
+    // Truncate to ~400K characters to leave room for output tokens
+    const MAX_CHARS = 400000;
     if (combinedText.length > MAX_CHARS) {
       console.log(`Truncating input from ${combinedText.length} to ${MAX_CHARS} characters`);
       combinedText = combinedText.substring(0, MAX_CHARS) + "\n\n[... Document truncated due to length. Analysis based on first portion of materials.]";
@@ -122,6 +122,7 @@ CRITICAL RULES:
       },
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
+        max_tokens: 16000,
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: `Analyze the following materials and produce the GTM & PMF due diligence report:\n\n${combinedText}` },
@@ -153,14 +154,50 @@ CRITICAL RULES:
     const aiResponse = await response.json();
     let content = aiResponse.choices?.[0]?.message?.content || "";
 
-    // Strip markdown code fences if present
-    content = content.replace(/```json\s*/g, "").replace(/```\s*/g, "").trim();
+    // Robust JSON extraction
+    function extractJson(raw: string): unknown {
+      let cleaned = raw.replace(/```json\s*/gi, "").replace(/```\s*/g, "").trim();
+      const jsonStart = cleaned.indexOf("{");
+      if (jsonStart === -1) throw new Error("No JSON object found");
+      cleaned = cleaned.substring(jsonStart);
+      
+      // Find matching closing brace
+      let depth = 0;
+      let jsonEnd = -1;
+      for (let i = 0; i < cleaned.length; i++) {
+        if (cleaned[i] === "{") depth++;
+        else if (cleaned[i] === "}") { depth--; if (depth === 0) { jsonEnd = i; break; } }
+      }
+      if (jsonEnd === -1) {
+        // Truncated response — try to repair by closing open structures
+        cleaned = cleaned + ']}]}';
+        // Retry finding end
+        depth = 0;
+        for (let i = 0; i < cleaned.length; i++) {
+          if (cleaned[i] === "{") depth++;
+          else if (cleaned[i] === "}") { depth--; if (depth === 0) { jsonEnd = i; break; } }
+        }
+        if (jsonEnd === -1) throw new Error("Cannot repair truncated JSON");
+      }
+      cleaned = cleaned.substring(0, jsonEnd + 1);
+
+      try {
+        return JSON.parse(cleaned);
+      } catch {
+        // Fix trailing commas and control chars
+        cleaned = cleaned
+          .replace(/,\s*}/g, "}")
+          .replace(/,\s*]/g, "]")
+          .replace(/[\x00-\x1F\x7F]/g, " ");
+        return JSON.parse(cleaned);
+      }
+    }
 
     let report;
     try {
-      report = JSON.parse(content);
+      report = extractJson(content);
     } catch (parseError) {
-      console.error("Failed to parse AI response:", content.substring(0, 500));
+      console.error("Failed to parse AI response:", content.substring(0, 1000), "...", content.substring(content.length - 500));
       return new Response(
         JSON.stringify({ error: "Failed to parse AI analysis. Please try again." }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
