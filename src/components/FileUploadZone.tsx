@@ -7,11 +7,14 @@ import type { UploadedFile } from '@/types/diligence';
 
 interface FileUploadZoneProps {
   files: UploadedFile[];
-  onFilesChange: (files: UploadedFile[]) => void;
+  onFilesChange: (files: UploadedFile[], nativeFiles?: File[]) => void;
   onStartAnalysis: () => void;
   isProcessing: boolean;
   children?: React.ReactNode;
 }
+
+// Keep track of native File objects alongside UploadedFile metadata
+let nativeFileStore: File[] = [];
 
 export function FileUploadZone({
   files,
@@ -28,7 +31,7 @@ export function FileUploadZone({
       setIsDragActive(false);
 
       const droppedFiles = Array.from(e.dataTransfer.files);
-      const newFiles: UploadedFile[] = droppedFiles.map((file) => ({
+      const newUploadedFiles: UploadedFile[] = droppedFiles.map((file) => ({
         id: crypto.randomUUID(),
         name: file.name,
         type: file.type,
@@ -37,7 +40,9 @@ export function FileUploadZone({
         progress: 100,
       }));
 
-      onFilesChange([...files, ...newFiles]);
+      const updatedFiles = [...files, ...newUploadedFiles];
+      nativeFileStore = [...nativeFileStore, ...droppedFiles];
+      onFilesChange(updatedFiles, nativeFileStore);
     },
     [files, onFilesChange]
   );
@@ -45,7 +50,7 @@ export function FileUploadZone({
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const selectedFiles = Array.from(e.target.files);
-      const newFiles: UploadedFile[] = selectedFiles.map((file) => ({
+      const newUploadedFiles: UploadedFile[] = selectedFiles.map((file) => ({
         id: crypto.randomUUID(),
         name: file.name,
         type: file.type,
@@ -54,12 +59,19 @@ export function FileUploadZone({
         progress: 100,
       }));
 
-      onFilesChange([...files, ...newFiles]);
+      const updatedFiles = [...files, ...newUploadedFiles];
+      nativeFileStore = [...nativeFileStore, ...selectedFiles];
+      onFilesChange(updatedFiles, nativeFileStore);
     }
   };
 
   const removeFile = (id: string) => {
-    onFilesChange(files.filter((f) => f.id !== id));
+    const fileIndex = files.findIndex((f) => f.id === id);
+    if (fileIndex !== -1) {
+      nativeFileStore = nativeFileStore.filter((_, i) => i !== fileIndex);
+    }
+    const updatedFiles = files.filter((f) => f.id !== id);
+    onFilesChange(updatedFiles, nativeFileStore);
   };
 
   const formatFileSize = (bytes: number) => {
