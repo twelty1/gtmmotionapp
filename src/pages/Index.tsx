@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { FileUploadZone } from '@/components/FileUploadZone';
 import { BusinessModelToggle } from '@/components/BusinessModelToggle';
@@ -9,9 +9,9 @@ import { GTMDecisionChart } from '@/components/charts/GTMDecisionChart';
 import { DisruptionSpectrum } from '@/components/charts/DisruptionSpectrum';
 import { AcquisitionFunnel } from '@/components/charts/AcquisitionFunnel';
 import { StatusBadge } from '@/components/StatusBadge';
-import { generateMockReport } from '@/lib/mockData';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { useToast } from '@/hooks/use-toast';
 import {
   BarChart3,
   FileText,
@@ -26,37 +26,123 @@ import type { UploadedFile, DiligenceReport, BusinessModel } from '@/types/dilig
 
 const Index = () => {
   const [files, setFiles] = useState<UploadedFile[]>([]);
+  const [rawFiles, setRawFiles] = useState<File[]>([]);
   const [businessModel, setBusinessModel] = useState<BusinessModel>('B2B');
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingProgress, setProcessingProgress] = useState(0);
+  const [processingLabel, setProcessingLabel] = useState('');
   const [report, setReport] = useState<DiligenceReport | null>(null);
+  const { toast } = useToast();
+
+  const readFileAsText = async (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsText(file);
+    });
+  };
 
   const handleStartAnalysis = async () => {
-    setIsProcessing(true);
-    setProcessingProgress(0);
-
-    // Simulate processing
-    const steps = [
-      { progress: 20, label: 'Ingesting documents...' },
-      { progress: 40, label: 'Extracting key information...' },
-      { progress: 60, label: 'Analyzing GTM signals...' },
-      { progress: 80, label: 'Generating insights...' },
-      { progress: 100, label: 'Complete!' },
-    ];
-
-    for (const step of steps) {
-      await new Promise((r) => setTimeout(r, 800));
-      setProcessingProgress(step.progress);
+    if (rawFiles.length === 0) {
+      toast({ title: 'No files', description: 'Please upload materials first.', variant: 'destructive' });
+      return;
     }
 
-    await new Promise((r) => setTimeout(r, 500));
-    setReport(generateMockReport('TechCorp AI', businessModel));
-    setIsProcessing(false);
+    setIsProcessing(true);
+    setProcessingProgress(0);
+    setProcessingLabel('Reading documents...');
+
+    try {
+      // Step 1: Read file contents
+      setProcessingProgress(15);
+      setProcessingLabel('Extracting text from documents...');
+      const documentTexts: string[] = [];
+      for (const file of rawFiles) {
+        try {
+          const text = await readFileAsText(file);
+          if (text.trim()) {
+            documentTexts.push(`--- ${file.name} ---\n${text}`);
+          }
+        } catch {
+          documentTexts.push(`--- ${file.name} --- [Could not extract text from this file format]`);
+        }
+      }
+
+      if (documentTexts.length === 0) {
+        throw new Error('Could not extract text from any uploaded files.');
+      }
+
+      // Step 2: Call AI analysis
+      setProcessingProgress(30);
+      setProcessingLabel('Analyzing materials with AI...');
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/analyze-documents`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({ documentTexts, businessModel }),
+        }
+      );
+
+      setProcessingProgress(70);
+      setProcessingLabel('Processing GTM insights...');
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `Analysis failed (${response.status})`);
+      }
+
+      const aiReport = await response.json();
+
+      setProcessingProgress(90);
+      setProcessingLabel('Building report...');
+
+      // Build the final report
+      const finalReport: DiligenceReport = {
+        id: crypto.randomUUID(),
+        createdAt: new Date(),
+        status: 'complete',
+        companyName: aiReport.companyName || 'Unknown Company',
+        businessModel,
+        sections: aiReport.sections || [],
+        customerSegments: aiReport.customerSegments || [],
+        positioning: aiReport.positioning || [],
+        gtmDecisions: aiReport.gtmDecisions || [],
+        disruptionScore: aiReport.disruptionScore || 0,
+        acquisitionFunnel: aiReport.acquisitionFunnel || [],
+      };
+
+      setProcessingProgress(100);
+      setProcessingLabel('Complete!');
+      await new Promise((r) => setTimeout(r, 500));
+      setReport(finalReport);
+    } catch (error) {
+      console.error('Analysis error:', error);
+      toast({
+        title: 'Analysis Failed',
+        description: error instanceof Error ? error.message : 'Something went wrong. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const handleRegenerate = () => {
     setReport(null);
     handleStartAnalysis();
+  };
+
+  const handleFilesChange = (uploadedFiles: UploadedFile[], nativeFiles?: File[]) => {
+    setFiles(uploadedFiles);
+    if (nativeFiles) {
+      setRawFiles(nativeFiles);
+    }
   };
 
   const getStatusCounts = () => {
@@ -114,12 +200,12 @@ const Index = () => {
               </h2>
               <p className="text-muted-foreground">
                 Upload pitch decks, memos, transcripts, and documents to generate
-                a comprehensive GTM and PMF analysis.
+                a comprehensive GTM and PMF analysis for the company.
               </p>
             </div>
             <FileUploadZone
               files={files}
-              onFilesChange={setFiles}
+              onFilesChange={handleFilesChange}
               onStartAnalysis={handleStartAnalysis}
               isProcessing={isProcessing}
             >
@@ -140,8 +226,7 @@ const Index = () => {
               Analyzing Materials
             </h2>
             <p className="text-muted-foreground mb-6">
-              Processing {files.length} document{files.length !== 1 && 's'} and
-              generating GTM insights...
+              {processingLabel}
             </p>
             <Progress value={processingProgress} className="h-2" />
             <p className="text-sm text-muted-foreground mt-2">
@@ -152,42 +237,43 @@ const Index = () => {
 
         {report && (
           <div className="space-y-8 animate-fade-in">
-            {/* Dashboard Header */}
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-              <div>
-                <h2 className="text-2xl font-bold text-foreground">
-                  Due Diligence Report
-                </h2>
-                <p className="text-muted-foreground">
-                  {report.companyName} • Generated{' '}
-                  {report.createdAt.toLocaleDateString()}
-                </p>
+            {/* Company Name Header */}
+            <div className="text-center pb-2 border-b border-border">
+              <h2 className="text-3xl font-bold text-foreground">
+                {report.companyName}
+              </h2>
+              <p className="text-muted-foreground mt-1">
+                {report.businessModel === 'B2B' ? 'Sales-Led' : 'Digitally-Led'} GTM Strategy • Generated{' '}
+                {report.createdAt.toLocaleDateString()}
+              </p>
+            </div>
+
+            {/* Status Summary */}
+            <div className="flex items-center justify-center gap-6">
+              <div className="flex items-center gap-2 text-sm">
+                <CheckCircle2 className="w-4 h-4 text-status-pass" />
+                <span className="text-muted-foreground">
+                  {statusCounts.pass} Pass
+                </span>
               </div>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2 text-sm">
-                  <CheckCircle2 className="w-4 h-4 text-status-pass" />
-                  <span className="text-muted-foreground">
-                    {statusCounts.pass} Pass
-                  </span>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <HelpCircle className="w-4 h-4 text-status-unclear" />
-                  <span className="text-muted-foreground">
-                    {statusCounts.unclear} Unclear
-                  </span>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <AlertCircle className="w-4 h-4 text-status-risk" />
-                  <span className="text-muted-foreground">
-                    {statusCounts.risk} Risk
-                  </span>
-                </div>
+              <div className="flex items-center gap-2 text-sm">
+                <HelpCircle className="w-4 h-4 text-status-unclear" />
+                <span className="text-muted-foreground">
+                  {statusCounts.unclear} Unclear
+                </span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <AlertCircle className="w-4 h-4 text-status-risk" />
+                <span className="text-muted-foreground">
+                  {statusCounts.risk} Risk
+                </span>
               </div>
             </div>
 
             {/* Grouped Analysis Sections */}
             {(['Value Proposition', 'Market Size', 'Traction'] as const).map((category) => {
               const categorySections = report.sections.filter(s => s.category === category);
+              if (categorySections.length === 0) return null;
               const categoryIcons = {
                 'Value Proposition': <FileText className="w-5 h-5 text-primary" />,
                 'Market Size': <BarChart3 className="w-5 h-5 text-primary" />,
@@ -235,24 +321,36 @@ const Index = () => {
             })}
 
             {/* Visualizations */}
-            <section>
-              <div className="flex items-center gap-2 mb-4">
-                <BarChart3 className="w-5 h-5 text-primary" />
-                <h3 className="text-lg font-semibold text-foreground">
-                  Visual Analysis
-                </h3>
-              </div>
-              <div className="grid lg:grid-cols-2 gap-6">
-                <AcquisitionFunnel
-                  data={report.acquisitionFunnel}
-                  businessModel={report.businessModel}
-                />
-                <SegmentationChart data={report.customerSegments} />
-                <PositioningMap data={report.positioning} />
-                <GTMDecisionChart data={report.gtmDecisions} />
-                <DisruptionSpectrum score={report.disruptionScore} />
-              </div>
-            </section>
+            {(report.acquisitionFunnel.length > 0 || report.customerSegments.length > 0 || report.positioning.length > 0 || report.gtmDecisions.length > 0) && (
+              <section>
+                <div className="flex items-center gap-2 mb-4">
+                  <BarChart3 className="w-5 h-5 text-primary" />
+                  <h3 className="text-lg font-semibold text-foreground">
+                    Visual Analysis
+                  </h3>
+                </div>
+                <div className="grid lg:grid-cols-2 gap-6">
+                  {report.acquisitionFunnel.length > 0 && (
+                    <AcquisitionFunnel
+                      data={report.acquisitionFunnel}
+                      businessModel={report.businessModel}
+                    />
+                  )}
+                  {report.customerSegments.length > 0 && (
+                    <SegmentationChart data={report.customerSegments} />
+                  )}
+                  {report.positioning.length > 0 && (
+                    <PositioningMap data={report.positioning} />
+                  )}
+                  {report.gtmDecisions.length > 0 && (
+                    <GTMDecisionChart data={report.gtmDecisions} />
+                  )}
+                  {report.disruptionScore > 0 && (
+                    <DisruptionSpectrum score={report.disruptionScore} />
+                  )}
+                </div>
+              </section>
+            )}
 
             {/* Add More Files */}
             <section className="bg-card border border-border rounded-lg p-6">
@@ -268,7 +366,7 @@ const Index = () => {
               </div>
               <FileUploadZone
                 files={files}
-                onFilesChange={setFiles}
+                onFilesChange={handleFilesChange}
                 onStartAnalysis={handleRegenerate}
                 isProcessing={isProcessing}
               />
