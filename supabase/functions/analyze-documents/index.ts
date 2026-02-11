@@ -26,7 +26,14 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const combinedText = documentTexts.join("\n\n---DOCUMENT SEPARATOR---\n\n");
+    let combinedText = documentTexts.join("\n\n---DOCUMENT SEPARATOR---\n\n");
+    
+    // Truncate to ~800K characters (~200K tokens) to stay within context limits
+    const MAX_CHARS = 800000;
+    if (combinedText.length > MAX_CHARS) {
+      console.log(`Truncating input from ${combinedText.length} to ${MAX_CHARS} characters`);
+      combinedText = combinedText.substring(0, MAX_CHARS) + "\n\n[... Document truncated due to length. Analysis based on first portion of materials.]";
+    }
     const isB2B = businessModel === "B2B";
 
     const systemPrompt = `You are an expert VC due diligence analyst specializing in GTM strategy and Product-Market Fit analysis. You analyze ONLY the materials provided — do not invent information. Extract the company name, then produce a structured analysis.
