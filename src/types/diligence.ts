@@ -47,6 +47,8 @@ export interface FunnelStage {
   name: string;
   value: number;
   percentage: number;
+  tactic: string;
+  channels: string[];
 }
 
 export interface DiligenceReport {

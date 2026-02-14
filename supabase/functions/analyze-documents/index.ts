@@ -66,7 +66,7 @@ Your output MUST be valid JSON matching this exact schema (no markdown, no code 
   "positioning": [{"company": "string", "innovation": number 0-100, "marketFit": number 0-100, "isTarget": boolean}],
   "gtmDecisions": [{"factor": "string", "pushScore": number 0-100, "pullScore": number 0-100}],
   "disruptionScore": number 0-100,
-  "acquisitionFunnel": [{"name": "string", "value": number, "percentage": number}]
+  "acquisitionFunnel": [{"name": "string", "value": number, "percentage": number, "tactic": "string - 1 sentence describing the specific tactic/action at this stage", "channels": ["string array - 2-3 specific channels or tools to use at this stage"]}]
 }
 
 The sections MUST include exactly these 18 items grouped into 3 categories:
@@ -108,7 +108,7 @@ CRITICAL RULES:
 - customerSegments percentages must sum to 100
 - positioning must include the target company (isTarget: true) and at least 2 competitors
 - gtmDecisions must have 5 factors with pushScore + pullScore = 100 each
-- acquisitionFunnel must have 6 stages with decreasing values
+- acquisitionFunnel must have 6 stages with decreasing values. Each stage MUST include a "tactic" (specific action) and "channels" (2-3 tools/platforms). This is a STRATEGIC GAMEPLAN, not just metrics — describe HOW to move prospects through each stage.
 - Use "risk" status when data suggests a problem that needs fixing, NOT when data is simply absent
 - Use "pass" when evidence supports the approach OR when your recommended approach is strong
 - Use "unclear" ONLY as last resort, and always pair it with a concrete recommendation

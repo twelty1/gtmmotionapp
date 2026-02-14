@@ -1,82 +1,85 @@
 import { cn } from '@/lib/utils';
 
 interface DisruptionSpectrumProps {
-  score: number; // 0-100, where 0 = incremental, 100 = disruptive
+  score: number;
 }
 
-export function DisruptionSpectrum({ score }: DisruptionSpectrumProps) {
-  const getLabel = (score: number) => {
-    if (score <= 25) return 'Incremental';
-    if (score <= 50) return 'Evolutionary';
-    if (score <= 75) return 'Transformative';
-    return 'Disruptive';
-  };
+const ZONES = [
+  { label: 'Incremental', range: '0-25', color: 'hsl(222, 47%, 45%)', desc: 'Improving existing solutions' },
+  { label: 'Evolutionary', range: '26-50', color: 'hsl(200, 60%, 45%)', desc: 'Meaningful category improvements' },
+  { label: 'Transformative', range: '51-75', color: 'hsl(38, 92%, 50%)', desc: 'Redefining how problems are solved' },
+  { label: 'Disruptive', range: '76-100', color: 'hsl(0, 72%, 55%)', desc: 'Category-creating innovation' },
+];
 
-  const getDescription = (score: number) => {
-    if (score <= 25)
-      return 'Improving existing solutions with marginal gains. Low risk, but limited upside potential.';
-    if (score <= 50)
-      return 'Meaningful improvements to established categories. Moderate market risk with clear value proposition.';
-    if (score <= 75)
-      return 'Significant shift in how problems are solved. Higher risk with substantial market opportunity.';
-    return 'Category-defining innovation. High execution risk but potential for outsized returns.';
-  };
+export function DisruptionSpectrum({ score }: DisruptionSpectrumProps) {
+  const activeZone = Math.min(Math.floor(score / 25), 3);
+  const zone = ZONES[activeZone];
 
   return (
-    <div className="bg-card border border-border rounded-lg p-4">
-      <h3 className="font-semibold text-foreground mb-4">
-        Incremental vs Disruptive Spectrum
+    <div className="bg-card border border-border rounded-lg p-5">
+      <h3 className="text-lg font-bold text-foreground mb-1">
+        Disruption Spectrum
       </h3>
+      <p className="text-xs text-muted-foreground mb-5">Where does this company sit?</p>
 
-      <div className="relative mb-6">
-        {/* Track */}
-        <div className="h-3 rounded-full bg-gradient-to-r from-chart-3 via-primary to-status-risk" />
+      {/* Track with gradient */}
+      <div className="relative mb-2">
+        <div className="h-4 rounded-full overflow-hidden flex">
+          {ZONES.map((z, i) => (
+            <div
+              key={i}
+              className="flex-1 transition-opacity duration-300"
+              style={{
+                backgroundColor: z.color,
+                opacity: i === activeZone ? 1 : 0.25,
+              }}
+            />
+          ))}
+        </div>
 
         {/* Marker */}
         <div
-          className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 transition-all duration-500"
+          className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 transition-all duration-700 ease-out"
           style={{ left: `${score}%` }}
         >
-          <div className="w-6 h-6 rounded-full bg-foreground border-4 border-background shadow-lg" />
-        </div>
-
-        {/* Labels */}
-        <div className="flex justify-between mt-3 text-xs text-muted-foreground">
-          <span>Incremental</span>
-          <span>Evolutionary</span>
-          <span>Transformative</span>
-          <span>Disruptive</span>
+          <div className="w-7 h-7 rounded-full bg-foreground border-[3px] border-background shadow-lg flex items-center justify-center">
+            <span className="text-[8px] font-bold text-background">{score}</span>
+          </div>
         </div>
       </div>
 
-      <div className="p-4 bg-muted/50 rounded-lg">
-        <div className="flex items-center justify-between mb-2">
-          <span className="font-semibold text-foreground">{getLabel(score)}</span>
-          <span className="text-lg font-mono font-bold text-primary">{score}%</span>
-        </div>
-        <p className="text-sm text-muted-foreground">{getDescription(score)}</p>
-      </div>
-
-      <div className="mt-4 grid grid-cols-4 gap-2 text-center">
-        {[
-          { label: '0-25%', desc: 'Low risk' },
-          { label: '26-50%', desc: 'Med risk' },
-          { label: '51-75%', desc: 'High risk' },
-          { label: '76-100%', desc: 'Very high' },
-        ].map((item, i) => (
-          <div
-            key={i}
-            className={cn(
-              'p-2 rounded text-xs',
-              score > i * 25 && score <= (i + 1) * 25
-                ? 'bg-primary/20 text-primary'
-                : 'bg-muted/30 text-muted-foreground'
-            )}
-          >
-            <div className="font-medium">{item.label}</div>
-            <div>{item.desc}</div>
+      {/* Zone labels */}
+      <div className="flex mb-6">
+        {ZONES.map((z, i) => (
+          <div key={i} className="flex-1 text-center">
+            <span className={cn(
+              'text-[10px] font-medium',
+              i === activeZone ? 'text-foreground' : 'text-muted-foreground/50'
+            )}>
+              {z.label}
+            </span>
           </div>
         ))}
+      </div>
+
+      {/* Active zone detail */}
+      <div
+        className="p-4 rounded-lg border"
+        style={{
+          backgroundColor: `${zone.color}10`,
+          borderColor: `${zone.color}30`,
+        }}
+      >
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="font-bold text-foreground">{zone.label}</span>
+          <span
+            className="text-lg font-mono font-black"
+            style={{ color: zone.color }}
+          >
+            {score}/100
+          </span>
+        </div>
+        <p className="text-sm text-muted-foreground">{zone.desc}</p>
       </div>
     </div>
   );
