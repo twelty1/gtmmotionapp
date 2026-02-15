@@ -29,5 +29,6 @@ export function generateMockReport(companyName: string, businessModel: BusinessM
     gtmDecisions: [],
     disruptionScore: 0,
     acquisitionFunnel: [],
+    roadmap: [],
   };
 }
