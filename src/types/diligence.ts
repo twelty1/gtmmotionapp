@@ -51,6 +51,21 @@ export interface FunnelStage {
   channels: string[];
 }
 
+export interface RoadmapMilestone {
+  title: string;
+  description: string;
+  tactics: string[];
+  successMetrics: string[];
+  timeline: string;
+}
+
+export interface RoadmapPhase {
+  id: 'icp-discovery' | 'pmf-validation' | 'gtm-scaling';
+  name: string;
+  objective: string;
+  milestones: RoadmapMilestone[];
+}
+
 export interface DiligenceReport {
   id: string;
   createdAt: Date;
@@ -63,4 +78,5 @@ export interface DiligenceReport {
   gtmDecisions: GTMDecision[];
   disruptionScore: number;
   acquisitionFunnel: FunnelStage[];
+  roadmap: RoadmapPhase[];
 }

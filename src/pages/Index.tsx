@@ -8,6 +8,7 @@ import { PositioningMap } from '@/components/charts/PositioningMap';
 import { GTMDecisionChart } from '@/components/charts/GTMDecisionChart';
 import { DisruptionSpectrum } from '@/components/charts/DisruptionSpectrum';
 import { AcquisitionFunnel } from '@/components/charts/AcquisitionFunnel';
+import { GTMRoadmap } from '@/components/GTMRoadmap';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
@@ -99,6 +100,7 @@ const Index = () => {
         gtmDecisions: aiReport.gtmDecisions || [],
         disruptionScore: aiReport.disruptionScore || 0,
         acquisitionFunnel: aiReport.acquisitionFunnel || [],
+        roadmap: aiReport.roadmap || [],
       };
       setProcessingProgress(100);
       setProcessingLabel('Complete!');
@@ -290,33 +292,12 @@ const Index = () => {
               );
             })}
 
-            {/* GTM Motion Summary */}
-            <section className="bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20 rounded-lg p-8 mt-10 mb-8">
-              <h3 className="text-lg font-bold text-foreground mb-6">GTM Motion: Execution Roadmap</h3>
-              <div className="space-y-5 text-sm leading-relaxed text-foreground/90">
-                <p>
-                  <strong className="text-foreground">Immediate (Weeks 1-4):</strong> {
-                    report.businessModel === 'B2B' 
-                      ? `Launch a targeted ABM campaign focusing on your highest-urgency customer segments (${report.customerSegments[0]?.name || 'primary market'}). Build a curated target account list of 50 high-fit prospects, establish clear discovery call scripts, and assign dedicated account executives to each prospect. Run parallel validation through LOI collection—aim for 3-5 letters of intent to prove sales motion viability. Simultaneously, address the biggest market size risks by collecting concrete TAM validation data from industry reports and customer conversations.`
-                      : `Build a self-serve product-led growth (PLG) experience that removes friction from onboarding—optimize your funnel's weakest conversion stage (currently ${report.acquisitionFunnel[Math.floor(report.acquisitionFunnel.length / 2)]?.name || 'middle stage'}). Implement viral loops and referral mechanics targeting your fastest-growing segment (${report.customerSegments[0]?.name || 'early adopters'}). Set up automated engagement tracking and retention metrics to identify churn patterns. Run daily experiments on landing page positioning to test your ${report.positioning[0]?.company || 'core value proposition'} messaging against competitor differentiation claims.`
-                  }
-                </p>
-                <p>
-                  <strong className="text-foreground">Short-term (Weeks 5-12):</strong> {
-                    report.businessModel === 'B2B'
-                      ? `Scale ABM efforts to 150 target accounts using multi-threaded selling strategies. Drive all closed deals through your sales team—focus on average contract value (ACV) expansion and account penetration. Host customer advisory boards with your top-performing accounts to validate product roadmap priorities and generate case studies. If your market trends show a shift toward your positioning, publish thought leadership content to reinforce your positioning vs. competitors and attract inbound deals.`
-                      : `Double down on your highest-performing acquisition channels—whether that's ${report.gtmDecisions[0]?.factor?.toLowerCase().includes('paid') ? 'paid performance marketing' : 'organic or viral loops'}. Implement retention playbooks based on your engagement metrics—identify power users and replicate their behavior patterns across your user base. Launch a referral program tied to your highest-impact customer segment to accelerate word-of-mouth growth. Build partnerships with complementary products in your niche to expand your TAM without proportional sales costs.`
-                  }
-                </p>
-                <p>
-                  <strong className="text-foreground">Medium-term (Months 3-6):</strong> {
-                    report.businessModel === 'B2B'
-                      ? `Achieve 10-15 closed customers with validated sales playbooks, focusing on customer success and retention to generate expansion revenue and referrals. Publish customer case studies and industry validation (awards, analyst recognition, seed investors) to build credibility with your buyer personas. If market trends are favorable, invest in enterprise sales infrastructure—add sales development reps (SDRs) and customer success managers (CSMs). Begin building a platform strategy to increase account lifetime value and reduce competitive churn.`
-                      : `Target 10K+ activated users with a 30%+ month-on-month growth rate in your largest customer segment. Invest in community building and user-generated content campaigns to deepen engagement and reduce churn. Optimize your acquisition funnel to achieve repeatable unit economics across all channels. Begin exploring monetization strategies that align with your cheapest-to-acquire, highest-engagement user cohort—whether that's premium tiers, marketplace fees, or enterprise licenses.`
-                  }
-                </p>
-              </div>
-            </section>
+            {/* GTM Execution Roadmap */}
+            {report.roadmap.length > 0 && (
+              <section className="mt-10 mb-8">
+                <GTMRoadmap phases={report.roadmap} />
+              </section>
+            )}
 
             {/* Add More Materials */}
             <section className="bg-card border border-border rounded-lg p-6 mt-8">

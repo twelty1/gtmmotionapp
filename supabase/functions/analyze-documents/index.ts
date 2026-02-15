@@ -66,7 +66,23 @@ Your output MUST be valid JSON matching this exact schema (no markdown, no code 
   "positioning": [{"company": "string", "innovation": number 0-100, "marketFit": number 0-100, "isTarget": boolean}],
   "gtmDecisions": [{"factor": "string", "pushScore": number 0-100, "pullScore": number 0-100}],
   "disruptionScore": number 0-100,
-  "acquisitionFunnel": [{"name": "string", "value": number, "percentage": number, "tactic": "string - 1 sentence describing the specific tactic/action at this stage", "channels": ["string array - 2-3 specific channels or tools to use at this stage"]}]
+  "acquisitionFunnel": [{"name": "string", "value": number, "percentage": number, "tactic": "string - 1 sentence describing the specific tactic/action at this stage", "channels": ["string array - 2-3 specific channels or tools to use at this stage"]}],
+  "roadmap": [
+    {
+      "id": "icp-discovery" | "pmf-validation" | "gtm-scaling",
+      "name": "string - phase name e.g. 'ICP Discovery & Validation'",
+      "objective": "string - 1-2 sentence strategic objective for this phase",
+      "milestones": [
+        {
+          "title": "string - milestone name",
+          "description": "string - what this milestone achieves",
+          "tactics": ["string array - 3-4 specific actions to take"],
+          "successMetrics": ["string array - 2-3 measurable KPIs"],
+          "timeline": "string - e.g. 'Weeks 1-2'"
+        }
+      ]
+    }
+  ]
 }
 
 The sections MUST include exactly these 18 items grouped into 3 categories:
@@ -109,6 +125,10 @@ CRITICAL RULES:
 - positioning must include the target company (isTarget: true) and at least 2 competitors
 - gtmDecisions must have 5 factors with pushScore + pullScore = 100 each
 - acquisitionFunnel must have 6 stages with decreasing values. Each stage MUST include a "tactic" (specific action) and "channels" (2-3 tools/platforms). This is a STRATEGIC GAMEPLAN, not just metrics — describe HOW to move prospects through each stage.
+- roadmap MUST have exactly 3 phases in order: "icp-discovery", "pmf-validation", "gtm-scaling". Each phase must have 2-3 milestones with specific tactics and success metrics.
+  - Phase 1 "icp-discovery": Focus on identifying and validating the ideal customer profile — who they are, where to find them, how to validate pain points. Include tactics like customer interviews, market research, persona building, and outreach experiments.
+  - Phase 2 "pmf-validation": Focus on proving product-market fit — getting paying customers, measuring engagement, collecting LOIs, running pilots. Include tactics like beta programs, pricing experiments, retention analysis, and feedback loops.
+  - Phase 3 "gtm-scaling": Focus on scaling the validated GTM motion — expanding channels, building sales/growth infrastructure, entering adjacent segments. Include tactics like hiring, channel expansion, partnerships, and process automation.
 - Use "risk" status when data suggests a problem that needs fixing, NOT when data is simply absent
 - Use "pass" when evidence supports the approach OR when your recommended approach is strong
 - Use "unclear" ONLY as last resort, and always pair it with a concrete recommendation
