@@ -51,6 +51,24 @@ export interface FunnelStage {
   channels: string[];
 }
 
+export interface BusinessModelFlowStage {
+  label: string;
+  description: string;
+  type: 'source' | 'process' | 'revenue';
+}
+
+export interface RevenueStream {
+  name: string;
+  description: string;
+  percentage?: number;
+}
+
+export interface BusinessModelData {
+  stages: BusinessModelFlowStage[];
+  revenueStreams: RevenueStream[];
+  summary: string;
+}
+
 export interface RoadmapMilestone {
   title: string;
   description: string;
@@ -79,4 +97,5 @@ export interface DiligenceReport {
   disruptionScore: number;
   acquisitionFunnel: FunnelStage[];
   roadmap: RoadmapPhase[];
+  businessModelFlow: BusinessModelData;
 }

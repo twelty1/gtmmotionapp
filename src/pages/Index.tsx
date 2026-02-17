@@ -9,6 +9,7 @@ import { GTMDecisionChart } from '@/components/charts/GTMDecisionChart';
 import { DisruptionSpectrum } from '@/components/charts/DisruptionSpectrum';
 import { AcquisitionFunnel } from '@/components/charts/AcquisitionFunnel';
 import { GTMRoadmap } from '@/components/GTMRoadmap';
+import { BusinessModelDiagram } from '@/components/charts/BusinessModelDiagram';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
@@ -101,6 +102,7 @@ const Index = () => {
         disruptionScore: aiReport.disruptionScore || 0,
         acquisitionFunnel: aiReport.acquisitionFunnel || [],
         roadmap: aiReport.roadmap || [],
+        businessModelFlow: aiReport.businessModelFlow || { stages: [], revenueStreams: [], summary: '' },
       };
       setProcessingProgress(100);
       setProcessingLabel('Complete!');
@@ -243,6 +245,13 @@ const Index = () => {
                 </div>
               </div>
             </div>
+
+            {/* Business Model Section */}
+            {report.businessModelFlow && report.businessModelFlow.stages.length > 0 && (
+              <section className="mb-12">
+                <BusinessModelDiagram data={report.businessModelFlow} />
+              </section>
+            )}
 
             {/* Category Sections with Inline Charts */}
             {(['Value Proposition', 'Market Size', 'Traction'] as const).map((category, catIdx) => {
