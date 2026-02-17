@@ -142,9 +142,9 @@ const Index = () => {
   const statusCounts = getStatusCounts();
 
   const categoryConfig = {
-    'Value Proposition': { icon: <FileText className="w-5 h-5" />, description: 'Analysis of core value drivers, differentiation, and go-to-market positioning' },
-    'Market Size': { icon: <TrendingUp className="w-5 h-5" />, description: 'Market opportunity assessment including TAM, competitive landscape, and trends' },
-    'Traction': { icon: <Target className="w-5 h-5" />, description: 'Evidence of product-market fit through customers, engagement, and validation signals' },
+    'Value Proposition': { icon: <FileText className="w-5 h-5" />, description: 'Core value drivers, differentiation, ICP definition, and go-to-market motion' },
+    'Market Size': { icon: <TrendingUp className="w-5 h-5" />, description: 'ROI positioning, market trends, and beachhead niche strategy' },
+    'Traction': { icon: <Target className="w-5 h-5" />, description: 'Industry validation signals and credibility building' },
   } as const;
 
   return (

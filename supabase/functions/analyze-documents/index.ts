@@ -85,7 +85,7 @@ Your output MUST be valid JSON matching this exact schema (no markdown, no code 
   ]
 }
 
-The sections MUST include exactly these 18 items grouped into 3 categories:
+The sections MUST include exactly these 10 items grouped into 3 categories:
 
 **Value Proposition** (6 sections):
 1. "customer-pain" - Customer Pain & Urgency: Identify the core pain, rate its urgency, and recommend how to amplify urgency in sales/marketing messaging.
@@ -95,40 +95,14 @@ The sections MUST include exactly these 18 items grouped into 3 categories:
 5. "platform-vs-product" - Platform vs Focused Product: Recommend whether to focus on a single product or build a platform, with reasoning.
 6. "gtm-motion" - Push vs Pull GTM Motion: RECOMMEND the optimal GTM motion (sales-led, product-led, community-led, or hybrid) with specific channel recommendations.
 
-**Market Size** (6 sections):
-7. "market-tam" - TAM: If TAM isn't stated, ESTIMATE it using bottom-up or top-down methods based on the ICP and pricing signals in the materials. Show your reasoning.
-8. "market-competitor-sales" - Competitors' Sales: Identify competitors and recommend competitive positioning tactics.
-9. "market-cost-savings" - Cost Savings: Quantify the ROI story for buyers — recommend how to frame cost savings in sales materials.
-10. "market-macro" - Macro Market: Identify macro tailwinds/headwinds and recommend how to leverage or mitigate them.
-11. "market-trends" - Market Trends: Identify relevant trends and recommend how to ride them in GTM messaging.
-12. "market-niche-platform" - Niche and Platform: Recommend the beachhead niche to dominate first before expanding.
+**Market Size** (3 sections):
+7. "market-cost-savings" - Cost Savings & ROI: Quantify the ROI story for buyers — recommend how to frame cost savings in sales materials.
+8. "market-trends" - Market Trends: Identify relevant trends and recommend how to ride them in GTM messaging.
+9. "market-niche-platform" - Niche and Platform: Recommend the beachhead niche to dominate first before expanding.
 
-**Traction** (6 sections):
-13. "traction-paying-customers" - Paying Customers: Assess current traction and recommend next milestones with specific targets.
-14. "traction-engagement" - Engagement Metrics: Recommend which metrics to track and what benchmarks to hit.
-15. "traction-lois" - Letters of Intent (LOIs): If no LOIs exist, recommend a strategy to secure 3-5 LOIs within 60 days.
-16. "traction-inferior-competition" - Inferior Competition: Identify competitive weaknesses to exploit and recommend attack strategies.
-17. "traction-seed-investors" - Seed Investors: Assess fundraising position and recommend investor targeting strategy.
-18. "traction-industry-validation" - Industry Validation: Recommend specific validation tactics (awards, analyst coverage, partnerships).
+**Traction** (1 section):
+10. "traction-industry-validation" - Industry Validation: Recommend specific validation tactics (awards, analyst coverage, partnerships).
 
-Business model is: ${businessModel}
-${isB2B 
-  ? "This is a B2B company. Focus on sales-led GTM motion, enterprise sales cycles, ABM strategies, ACV, account-based approaches. The acquisition funnel should reflect enterprise sales stages (Target Accounts → Outreach/ABM → Discovery Calls → Proposals → Negotiations → Closed Won). Recommend specific B2B tactics."
-  : "This is a B2C company. Focus on digitally-led/product-led growth, viral loops, performance marketing, self-serve conversion. The acquisition funnel should reflect consumer stages (Website Visitors → Sign-ups → Activated Users → Trial Users → Paid Conversion → Retained). Recommend specific B2C growth tactics."
-}
-
-CRITICAL RULES:
-- NEVER say "not mentioned," "unclear from materials," or "not specified" without ALSO providing a strategic recommendation
-- Every recommendation must be SPECIFIC: include channels, tools, timelines, and success metrics
-- The companyName MUST be extracted from the materials
-- customerSegments percentages must sum to 100
-- positioning must include the target company (isTarget: true) and at least 2 competitors
-- gtmDecisions must have 5 factors with pushScore + pullScore = 100 each
-- acquisitionFunnel must have 6 stages with decreasing values. Each stage MUST include a "tactic" (specific action) and "channels" (2-3 tools/platforms). This is a STRATEGIC GAMEPLAN, not just metrics — describe HOW to move prospects through each stage.
-- roadmap MUST have exactly 3 phases in order: "icp-discovery", "pmf-validation", "gtm-scaling". Each phase must have 2-3 milestones with specific tactics and success metrics.
-  - Phase 1 "icp-discovery": Focus on identifying and validating the ideal customer profile — who they are, where to find them, how to validate pain points. Include tactics like customer interviews, market research, persona building, and outreach experiments.
-  - Phase 2 "pmf-validation": Focus on proving product-market fit — getting paying customers, measuring engagement, collecting LOIs, running pilots. Include tactics like beta programs, pricing experiments, retention analysis, and feedback loops.
-  - Phase 3 "gtm-scaling": Focus on scaling the validated GTM motion — expanding channels, building sales/growth infrastructure, entering adjacent segments. Include tactics like hiring, channel expansion, partnerships, and process automation.
 - Use "risk" status when data suggests a problem that needs fixing, NOT when data is simply absent
 - Use "pass" when evidence supports the approach OR when your recommended approach is strong
 - Use "unclear" ONLY as last resort, and always pair it with a concrete recommendation
