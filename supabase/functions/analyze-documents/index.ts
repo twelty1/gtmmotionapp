@@ -67,6 +67,23 @@ Your output MUST be valid JSON matching this exact schema (no markdown, no code 
   "gtmDecisions": [{"factor": "string", "pushScore": number 0-100, "pullScore": number 0-100}],
   "disruptionScore": number 0-100,
   "acquisitionFunnel": [{"name": "string", "value": number, "percentage": number, "tactic": "string - 1 sentence describing the specific tactic/action at this stage", "channels": ["string array - 2-3 specific channels or tools to use at this stage"]}],
+  "businessModelFlow": {
+    "stages": [
+      {
+        "label": "string - short name for this stage e.g. 'Target Enterprise Buyers'",
+        "description": "string - 1-2 sentences explaining what happens at this stage",
+        "type": "source" | "process" | "revenue"
+      }
+    ],
+    "revenueStreams": [
+      {
+        "name": "string - revenue stream name e.g. 'SaaS Subscriptions'",
+        "description": "string - how this revenue stream works",
+        "percentage": number 0-100 (optional, estimate share of total revenue)
+      }
+    ],
+    "summary": "string - 2-3 sentence overview of how the business model works end-to-end"
+  },
   "roadmap": [
     {
       "id": "icp-discovery" | "pmf-validation" | "gtm-scaling",
@@ -103,6 +120,7 @@ The sections MUST include exactly these 10 items grouped into 3 categories:
 **Traction** (1 section):
 10. "traction-industry-validation" - Industry Validation: Recommend specific validation tactics (awards, analyst coverage, partnerships).
 
+- businessModelFlow MUST have 4-6 stages showing the end-to-end business model flow. Start with "source" stages (where customers/value come from), then "process" stages (how value is delivered), then "revenue" stages (how money is made). Must include 1-4 revenueStreams with estimated percentage splits summing to 100.
 - Use "risk" status when data suggests a problem that needs fixing, NOT when data is simply absent
 - Use "pass" when evidence supports the approach OR when your recommended approach is strong
 - Use "unclear" ONLY as last resort, and always pair it with a concrete recommendation
