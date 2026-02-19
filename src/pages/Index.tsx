@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { FileUploadZone } from '@/components/FileUploadZone';
 import { BusinessModelToggle } from '@/components/BusinessModelToggle';
@@ -23,6 +23,8 @@ import {
   Loader2,
   Target,
   TrendingUp,
+  Sun,
+  Moon,
 } from 'lucide-react';
 import type { UploadedFile, DiligenceReport, BusinessModel } from '@/types/diligence';
 
@@ -35,6 +37,18 @@ const Index = () => {
   const [processingLabel, setProcessingLabel] = useState('');
   const [report, setReport] = useState<DiligenceReport | null>(null);
   const { toast } = useToast();
+  const [darkMode, setDarkMode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('theme') === 'dark' || 
+        (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', darkMode);
+    localStorage.setItem('theme', darkMode ? 'dark' : 'light');
+  }, [darkMode]);
 
   const readFileAsText = async (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -164,12 +178,22 @@ const Index = () => {
                 <p className="text-sm text-muted-foreground">GTM & Product-Market Fit Analysis</p>
               </div>
             </div>
-            {report && (
-              <Button variant="outline" onClick={handleRegenerate} className="gap-2">
-                <RefreshCw className="w-4 h-4" />
-                Regenerate
+            <div className="flex items-center gap-3">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setDarkMode(!darkMode)}
+                className="rounded-full"
+              >
+                {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
               </Button>
-            )}
+              {report && (
+                <Button variant="outline" onClick={handleRegenerate} className="gap-2">
+                  <RefreshCw className="w-4 h-4" />
+                  Regenerate
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </header>
