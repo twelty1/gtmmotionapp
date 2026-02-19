@@ -134,7 +134,7 @@ The sections MUST include exactly these 10 items grouped into 3 categories:
       },
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
-        max_tokens: 16000,
+        max_tokens: 32000,
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: `Analyze the following materials and produce the GTM & PMF due diligence report:\n\n${combinedText}` },
