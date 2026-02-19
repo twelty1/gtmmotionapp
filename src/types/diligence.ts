@@ -77,6 +77,14 @@ export interface RoadmapMilestone {
   timeline: string;
 }
 
+export interface RiskyGTMStrategy {
+  title: string;
+  description: string;
+  riskLevel: 'high' | 'very-high' | 'extreme';
+  potentialUpside: string;
+  estimatedCost: string;
+}
+
 export interface RoadmapPhase {
   id: 'icp-discovery' | 'pmf-validation' | 'gtm-scaling';
   name: string;
@@ -98,4 +106,5 @@ export interface DiligenceReport {
   acquisitionFunnel: FunnelStage[];
   roadmap: RoadmapPhase[];
   businessModelFlow: BusinessModelData;
+  riskyStrategies: RiskyGTMStrategy[];
 }
