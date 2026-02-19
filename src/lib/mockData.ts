@@ -31,5 +31,6 @@ export function generateMockReport(companyName: string, businessModel: BusinessM
     acquisitionFunnel: [],
     roadmap: [],
     businessModelFlow: { stages: [], revenueStreams: [], summary: '' },
+    riskyStrategies: [],
   };
 }

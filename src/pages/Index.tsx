@@ -10,6 +10,7 @@ import { DisruptionSpectrum } from '@/components/charts/DisruptionSpectrum';
 import { AcquisitionFunnel } from '@/components/charts/AcquisitionFunnel';
 import { GTMRoadmap } from '@/components/GTMRoadmap';
 import { BusinessModelDiagram } from '@/components/charts/BusinessModelDiagram';
+import { RiskyStrategies } from '@/components/RiskyStrategies';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
@@ -117,6 +118,7 @@ const Index = () => {
         acquisitionFunnel: aiReport.acquisitionFunnel || [],
         roadmap: aiReport.roadmap || [],
         businessModelFlow: aiReport.businessModelFlow || { stages: [], revenueStreams: [], summary: '' },
+        riskyStrategies: aiReport.riskyStrategies || [],
       };
       setProcessingProgress(100);
       setProcessingLabel('Complete!');
@@ -329,6 +331,13 @@ const Index = () => {
             {report.roadmap.length > 0 && (
               <section className="mt-10 mb-8">
                 <GTMRoadmap phases={report.roadmap} />
+              </section>
+            )}
+
+            {/* Risky GTM Strategies */}
+            {report.riskyStrategies.length > 0 && (
+              <section className="mt-10 mb-8">
+                <RiskyStrategies strategies={report.riskyStrategies} />
               </section>
             )}
 

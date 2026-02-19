@@ -84,6 +84,15 @@ Your output MUST be valid JSON matching this exact schema (no markdown, no code 
     ],
     "summary": "string - 2-3 sentence overview of how the business model works end-to-end"
   },
+  "riskyStrategies": [
+    {
+      "title": "string - name of the unconventional tactic e.g. 'Mass UGC Creator Blitz'",
+      "description": "string - 2-3 sentences describing the approach and why it's unconventional",
+      "riskLevel": "high" | "very-high" | "extreme",
+      "potentialUpside": "string - what could happen if it works e.g. '10x brand awareness in 30 days'",
+      "estimatedCost": "string - rough cost range e.g. '$5K-$15K'"
+    }
+  ],
   "roadmap": [
     {
       "id": "icp-discovery" | "pmf-validation" | "gtm-scaling",
@@ -121,6 +130,7 @@ The sections MUST include exactly these 10 items grouped into 3 categories:
 10. "traction-industry-validation" - Industry Validation: Recommend specific validation tactics (awards, analyst coverage, partnerships).
 
 - businessModelFlow MUST have 4-6 stages showing the end-to-end business model flow. Start with "source" stages (where customers/value come from), then "process" stages (how value is delivered), then "revenue" stages (how money is made). Must include 1-4 revenueStreams with estimated percentage splits summing to 100.
+- riskyStrategies MUST include 4-6 unconventional, high-risk GTM tactics that are NOT part of the main strategy. Think guerrilla marketing, mass UGC creator campaigns, billboards, viral stunts, controversial PR, community takeovers, event ambush marketing, etc. These should be creative and out-of-the-box ideas with honest risk assessment. Mix riskLevels across "high", "very-high", and "extreme".
 - Use "risk" status when data suggests a problem that needs fixing, NOT when data is simply absent
 - Use "pass" when evidence supports the approach OR when your recommended approach is strong
 - Use "unclear" ONLY as last resort, and always pair it with a concrete recommendation
