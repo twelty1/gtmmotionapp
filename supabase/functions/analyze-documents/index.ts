@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { documentTexts, businessModel } = await req.json();
+    const { documentTexts, businessModel, additionalContext } = await req.json();
 
     if (!documentTexts || documentTexts.length === 0) {
       return new Response(
@@ -147,7 +147,7 @@ The sections MUST include exactly these 10 items grouped into 3 categories:
         max_tokens: 32000,
         messages: [
           { role: "system", content: systemPrompt },
-          { role: "user", content: `Analyze the following materials and produce the GTM & PMF due diligence report:\n\n${combinedText}` },
+          { role: "user", content: `Analyze the following materials and produce the GTM & PMF due diligence report:\n\n${combinedText}${additionalContext ? `\n\n---ADDITIONAL CONTEXT FROM ANALYST---\n\n${additionalContext}` : ""}` },
         ],
       }),
     });
