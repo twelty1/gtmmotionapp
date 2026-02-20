@@ -32,6 +32,7 @@ import type { UploadedFile, DiligenceReport, BusinessModel } from '@/types/dilig
 const Index = () => {
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [rawFiles, setRawFiles] = useState<File[]>([]);
+  const [additionalContext, setAdditionalContext] = useState('');
   const [businessModel, setBusinessModel] = useState<BusinessModel>('B2B');
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingProgress, setProcessingProgress] = useState(0);
@@ -92,7 +93,7 @@ const Index = () => {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
-          body: JSON.stringify({ documentTexts, businessModel }),
+          body: JSON.stringify({ documentTexts, businessModel, additionalContext: additionalContext.trim() || undefined }),
         }
       );
       setProcessingProgress(70);
@@ -212,6 +213,22 @@ const Index = () => {
             </div>
             <FileUploadZone files={files} onFilesChange={handleFilesChange} onStartAnalysis={handleStartAnalysis} isProcessing={isProcessing}>
               <BusinessModelToggle value={businessModel} onChange={setBusinessModel} />
+              <div className="mt-4">
+                <label htmlFor="additional-context" className="block text-sm font-medium text-foreground mb-1.5">
+                  Additional Context & Notes (optional)
+                </label>
+                <textarea
+                  id="additional-context"
+                  value={additionalContext}
+                  onChange={(e) => setAdditionalContext(e.target.value)}
+                  placeholder="Add any extra context, key questions, recent developments, or details not covered in the uploaded materials..."
+                  className="flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  rows={4}
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  This will be included as additional context for the AI analysis.
+                </p>
+              </div>
             </FileUploadZone>
           </div>
         )}
