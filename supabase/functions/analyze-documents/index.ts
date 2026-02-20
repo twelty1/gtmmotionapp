@@ -96,6 +96,8 @@ Your output MUST be valid JSON matching this exact schema (no markdown, no code 
       "estimatedCost": "string - rough cost range e.g. '$5K-$15K'"
     }
   ],
+  "gtmSummaryParagraph": "string - A polished, professional summary paragraph (5-8 sentences) that synthesizes the company's overall GTM strategy, market positioning, target customers, key competitive advantages, and growth trajectory. Write in third person, past/present tense, as if written by a VC analyst. Reference specific market data (TAM, CAGR), target segments, channels, and strategic advantages mentioned in the analysis. Should read like a final investment memo paragraph.",
+  "businessModelSummaryParagraph": "string - A polished, professional summary paragraph (5-8 sentences) that describes the company's business model end-to-end: how they make money, pricing structure, customer payment terms, key partnerships, and revenue mechanics. Write in third person as if written by a VC analyst. Be specific about pricing tiers, payment structures, unit economics, and go-to-market delivery mechanisms.",
   "roadmap": [
     {
       "id": "icp-discovery" | "pmf-validation" | "gtm-scaling",
