@@ -362,9 +362,27 @@ const Index = () => {
             <section className="bg-card border border-border rounded-lg p-6 mt-8">
               <div className="mb-4">
                 <h3 className="font-semibold text-foreground">Refine This Analysis</h3>
-                <p className="text-sm text-muted-foreground">Upload additional materials to deepen the analysis</p>
+                <p className="text-sm text-muted-foreground">Upload additional materials or add new context to regenerate the report</p>
               </div>
-              <FileUploadZone files={files} onFilesChange={handleFilesChange} onStartAnalysis={handleRegenerate} isProcessing={isProcessing} />
+              <FileUploadZone files={files} onFilesChange={handleFilesChange} onStartAnalysis={handleRegenerate} isProcessing={isProcessing}>
+                <BusinessModelToggle value={businessModel} onChange={setBusinessModel} />
+                <div className="mt-4">
+                  <label htmlFor="additional-context-refine" className="block text-sm font-medium text-foreground mb-1.5">
+                    Additional Context & Notes (optional)
+                  </label>
+                  <textarea
+                    id="additional-context-refine"
+                    value={additionalContext}
+                    onChange={(e) => setAdditionalContext(e.target.value)}
+                    placeholder="Add new findings, context, key questions, or details to refine the analysis..."
+                    className="flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    rows={4}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    This will be included as additional context when regenerating the report.
+                  </p>
+                </div>
+              </FileUploadZone>
             </section>
           </div>
         )}
