@@ -120,6 +120,8 @@ const Index = () => {
         roadmap: aiReport.roadmap || [],
         businessModelFlow: aiReport.businessModelFlow || { stages: [], revenueStreams: [], summary: '' },
         riskyStrategies: aiReport.riskyStrategies || [],
+        gtmSummaryParagraph: aiReport.gtmSummaryParagraph || '',
+        businessModelSummaryParagraph: aiReport.businessModelSummaryParagraph || '',
       };
       setProcessingProgress(100);
       setProcessingLabel('Complete!');
@@ -254,7 +256,7 @@ const Index = () => {
               <p className="text-xs font-semibold text-primary uppercase tracking-widest mb-2">Due Diligence Report</p>
               <h2 className="text-4xl font-bold text-foreground mb-3">{report.companyName}</h2>
               <p className="text-muted-foreground">
-                {report.businessModel === 'B2B' ? 'Sales-Led' : 'Digitally-Led'} GTM Strategy Analysis
+                {report.businessModel === 'B2B' ? 'Sales-Led' : report.businessModel === 'B2C' ? 'Digitally-Led' : 'Mixed (B2B + B2C)'} GTM Strategy Analysis
               </p>
               <p className="text-xs text-muted-foreground mt-2">
                 Generated {report.createdAt.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
@@ -355,6 +357,26 @@ const Index = () => {
             {report.riskyStrategies.length > 0 && (
               <section className="mt-10 mb-8">
                 <RiskyStrategies strategies={report.riskyStrategies} />
+              </section>
+            )}
+
+            {/* Summary Paragraphs */}
+            {(report.gtmSummaryParagraph || report.businessModelSummaryParagraph) && (
+              <section className="mt-10 mb-8 space-y-8">
+                {report.gtmSummaryParagraph && (
+                  <div className="bg-card border border-border rounded-lg p-6">
+                    <h3 className="text-lg font-bold text-foreground mb-1">Market & GTM Summary</h3>
+                    <div className="w-12 h-0.5 bg-primary mb-4" />
+                    <p className="text-sm text-muted-foreground leading-relaxed">{report.gtmSummaryParagraph}</p>
+                  </div>
+                )}
+                {report.businessModelSummaryParagraph && (
+                  <div className="bg-card border border-border rounded-lg p-6">
+                    <h3 className="text-lg font-bold text-foreground mb-1">Business Model Summary</h3>
+                    <div className="w-12 h-0.5 bg-primary mb-4" />
+                    <p className="text-sm text-muted-foreground leading-relaxed">{report.businessModelSummaryParagraph}</p>
+                  </div>
+                )}
               </section>
             )}
 

@@ -107,4 +107,6 @@ export interface DiligenceReport {
   roadmap: RoadmapPhase[];
   businessModelFlow: BusinessModelData;
   riskyStrategies: RiskyGTMStrategy[];
+  gtmSummaryParagraph?: string;
+  businessModelSummaryParagraph?: string;
 }
