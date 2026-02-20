@@ -34,9 +34,12 @@ serve(async (req) => {
       console.log(`Truncating input from ${combinedText.length} to ${MAX_CHARS} characters`);
       combinedText = combinedText.substring(0, MAX_CHARS) + "\n\n[... Document truncated due to length. Analysis based on first portion of materials.]";
     }
-    const isB2B = businessModel === "B2B";
+    const isMixed = businessModel === "Mixed";
+    const isB2B = businessModel === "B2B" || isMixed;
 
     const systemPrompt = `You are an elite GTM strategist and Product-Market Fit architect for venture-backed startups. Your job is NOT just to summarize what's in the materials — your job is to BUILD a comprehensive GTM strategy and PMF assessment based on the information provided.
+
+BUSINESS MODEL: ${businessModel === "Mixed" ? "Mixed (B2B + B2C). This company operates BOTH B2B and B2C channels. You MUST create separate GTM motions, acquisition funnels, and channel strategies for BOTH the B2B side (sales-led, partnerships, enterprise) AND the B2C side (digital, PLG, consumer). Cover both ends in every relevant section — segmentation, positioning, funnel, roadmap, and risky strategies." : businessModel === "B2B" ? "B2B (Sales-Led). Focus on enterprise sales, ABM, partnerships, and account-based strategies." : "B2C (Digitally-Led). Focus on product-led growth, digital acquisition, consumer marketing, and viral loops."}
 
 CRITICAL MINDSET:
 - You are a strategic advisor, not a passive reviewer. DO NOT say "unclear" or "not specified" — instead, use the available data to RECOMMEND the best approach.

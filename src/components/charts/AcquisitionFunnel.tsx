@@ -5,7 +5,7 @@ import type { FunnelStage } from '@/types/diligence';
 
 interface AcquisitionFunnelProps {
   data: FunnelStage[];
-  businessModel: 'B2B' | 'B2C';
+  businessModel: 'B2B' | 'B2C' | 'Mixed';
 }
 
 const STAGE_ICONS = [Megaphone, Users, MousePointerClick, UserCheck, CreditCard, Heart];

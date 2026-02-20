@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import { Building2, ShoppingCart } from 'lucide-react';
+import { Building2, ShoppingCart, Shuffle } from 'lucide-react';
 import type { BusinessModel } from '@/types/diligence';
 
 interface BusinessModelToggleProps {
@@ -16,7 +16,7 @@ export function BusinessModelToggle({ value, onChange }: BusinessModelToggleProp
           Select your go-to-market approach
         </p>
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-3 gap-3">
         <button
           onClick={() => onChange('B2B')}
           className={cn(
@@ -84,6 +84,41 @@ export function BusinessModelToggle({ value, onChange }: BusinessModelToggleProp
               B2C
             </span>
             <span className="text-xs text-muted-foreground">Digitally-Led</span>
+          </div>
+        </button>
+
+        <button
+          onClick={() => onChange('Mixed')}
+          className={cn(
+            'flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all duration-200',
+            value === 'Mixed'
+              ? 'border-primary bg-primary/10 shadow-[0_0_12px_hsl(var(--primary)/0.15)]'
+              : 'border-border hover:border-primary/40 hover:bg-muted/50'
+          )}
+        >
+          <div
+            className={cn(
+              'w-10 h-10 rounded-full flex items-center justify-center transition-colors',
+              value === 'Mixed' ? 'bg-primary/20' : 'bg-muted'
+            )}
+          >
+            <Shuffle
+              className={cn(
+                'w-5 h-5 transition-colors',
+                value === 'Mixed' ? 'text-primary' : 'text-muted-foreground'
+              )}
+            />
+          </div>
+          <div className="text-center">
+            <span
+              className={cn(
+                'text-sm font-semibold block',
+                value === 'Mixed' ? 'text-primary' : 'text-foreground'
+              )}
+            >
+              Mixed
+            </span>
+            <span className="text-xs text-muted-foreground">B2B + B2C</span>
           </div>
         </button>
       </div>

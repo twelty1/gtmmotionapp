@@ -41,7 +41,7 @@ export interface GTMDecision {
   pullScore: number;
 }
 
-export type BusinessModel = 'B2B' | 'B2C';
+export type BusinessModel = 'B2B' | 'B2C' | 'Mixed';
 
 export interface FunnelStage {
   name: string;
