@@ -1,25 +1,27 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { z } from "npm:zod@3.25.76";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
+const RequestSchema = z.object({
+  documentTexts: z.array(z.string().trim().min(1).max(400_000)).min(1).max(20),
+  businessModel: z.enum(["B2B", "B2C", "Mixed"]),
+  additionalContext: z.string().trim().max(20_000).optional(),
+});
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+    return new Response("ok", { headers: corsHeaders });
   }
 
   try {
-    const { documentTexts, businessModel, additionalContext } = await req.json();
-
-    if (!documentTexts || documentTexts.length === 0) {
+    const parsed = RequestSchema.safeParse(await req.json());
+    if (!parsed.success) {
       return new Response(
-        JSON.stringify({ error: "No document texts provided" }),
+        JSON.stringify({ error: "Invalid analysis request", details: parsed.error.flatten().fieldErrors }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+    const { documentTexts, businessModel, additionalContext } = parsed.data;
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
@@ -28,8 +30,8 @@ serve(async (req) => {
 
     let combinedText = documentTexts.join("\n\n---DOCUMENT SEPARATOR---\n\n");
     
-    // Truncate to ~400K characters to leave room for output tokens
-    const MAX_CHARS = 400000;
+    // Keep the prompt bounded so the model has enough context budget to finish the large JSON report.
+    const MAX_CHARS = 180000;
     if (combinedText.length > MAX_CHARS) {
       console.log(`Truncating input from ${combinedText.length} to ${MAX_CHARS} characters`);
       combinedText = combinedText.substring(0, MAX_CHARS) + "\n\n[... Document truncated due to length. Analysis based on first portion of materials.]";
@@ -150,6 +152,7 @@ The sections MUST include exactly these 10 items grouped into 3 categories:
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         max_tokens: 32000,
+        response_format: { type: "json_object" },
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: `Analyze the following materials and produce the GTM & PMF due diligence report:\n\n${combinedText}${additionalContext ? `\n\n---ADDITIONAL CONTEXT FROM ANALYST---\n\n${additionalContext}` : ""}` },
@@ -179,7 +182,7 @@ The sections MUST include exactly these 10 items grouped into 3 categories:
     }
 
     const aiResponse = await response.json();
-    let content = aiResponse.choices?.[0]?.message?.content || "";
+    const content = aiResponse.choices?.[0]?.message?.content || "";
 
     // Robust JSON extraction
     function extractJson(raw: string): unknown {
@@ -188,24 +191,30 @@ The sections MUST include exactly these 10 items grouped into 3 categories:
       if (jsonStart === -1) throw new Error("No JSON object found");
       cleaned = cleaned.substring(jsonStart);
       
-      // Find matching closing brace
+      // Find the matching closing brace while ignoring braces inside JSON strings.
       let depth = 0;
       let jsonEnd = -1;
+      let inString = false;
+      let escaped = false;
       for (let i = 0; i < cleaned.length; i++) {
-        if (cleaned[i] === "{") depth++;
-        else if (cleaned[i] === "}") { depth--; if (depth === 0) { jsonEnd = i; break; } }
-      }
-      if (jsonEnd === -1) {
-        // Truncated response — try to repair by closing open structures
-        cleaned = cleaned + ']}]}';
-        // Retry finding end
-        depth = 0;
-        for (let i = 0; i < cleaned.length; i++) {
-          if (cleaned[i] === "{") depth++;
-          else if (cleaned[i] === "}") { depth--; if (depth === 0) { jsonEnd = i; break; } }
+        const char = cleaned[i];
+        if (escaped) {
+          escaped = false;
+        } else if (char === "\\" && inString) {
+          escaped = true;
+        } else if (char === '"') {
+          inString = !inString;
+        } else if (!inString && char === "{") {
+          depth++;
+        } else if (!inString && char === "}") {
+          depth--;
+          if (depth === 0) {
+            jsonEnd = i;
+            break;
+          }
         }
-        if (jsonEnd === -1) throw new Error("Cannot repair truncated JSON");
       }
+      if (jsonEnd === -1) throw new Error("AI returned truncated JSON");
       cleaned = cleaned.substring(0, jsonEnd + 1);
 
       try {
@@ -224,7 +233,11 @@ The sections MUST include exactly these 10 items grouped into 3 categories:
     try {
       report = extractJson(content);
     } catch (parseError) {
-      console.error("Failed to parse AI response:", content.substring(0, 1000), "...", content.substring(content.length - 500));
+      console.error("Failed to parse AI response", {
+        message: parseError instanceof Error ? parseError.message : "Unknown parse error",
+        finishReason: aiResponse.choices?.[0]?.finish_reason,
+        responseLength: content.length,
+      });
       return new Response(
         JSON.stringify({ error: "Failed to parse AI analysis. Please try again." }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
