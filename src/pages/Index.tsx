@@ -1,4 +1,7 @@
 import { useState, useEffect } from 'react';
+import * as mammoth from 'mammoth/mammoth.browser';
+import { GlobalWorkerOptions, getDocument } from 'pdfjs-dist/legacy/build/pdf.mjs';
+import pdfWorkerUrl from 'pdfjs-dist/legacy/build/pdf.worker.min.mjs?url';
 import { cn } from '@/lib/utils';
 import { FileUploadZone } from '@/components/FileUploadZone';
 import { BusinessModelToggle } from '@/components/BusinessModelToggle';
@@ -29,6 +32,8 @@ import {
 } from 'lucide-react';
 import type { UploadedFile, DiligenceReport, BusinessModel } from '@/types/diligence';
 
+GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
+
 const Index = () => {
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [rawFiles, setRawFiles] = useState<File[]>([]);
@@ -53,12 +58,29 @@ const Index = () => {
   }, [darkMode]);
 
   const readFileAsText = async (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsText(file);
-    });
+    const extension = file.name.split('.').pop()?.toLowerCase();
+
+    if (extension === 'pdf') {
+      const pdf = await getDocument({ data: new Uint8Array(await file.arrayBuffer()) }).promise;
+      const pages: string[] = [];
+      for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
+        const page = await pdf.getPage(pageNumber);
+        const content = await page.getTextContent();
+        pages.push(content.items.map((item) => ('str' in item ? item.str : '')).join(' '));
+      }
+      return pages.join('\n\n');
+    }
+
+    if (extension === 'docx') {
+      const result = await mammoth.extractRawText({ arrayBuffer: await file.arrayBuffer() });
+      return result.value;
+    }
+
+    if (extension === 'txt' || extension === 'md') {
+      return file.text();
+    }
+
+    throw new Error(`Text extraction is not supported for ${file.name}`);
   };
 
   const handleStartAnalysis = async () => {
@@ -77,11 +99,11 @@ const Index = () => {
         try {
           const text = await readFileAsText(file);
           if (text.trim()) documentTexts.push(`--- ${file.name} ---\n${text}`);
-        } catch {
-          documentTexts.push(`--- ${file.name} --- [Could not extract text]`);
+        } catch (error) {
+          console.error(`Could not extract ${file.name}:`, error);
         }
       }
-      if (documentTexts.length === 0) throw new Error('Could not extract text from any uploaded files.');
+      if (documentTexts.length === 0) throw new Error('Could not extract text from the uploaded files. Please use a text-based PDF, DOCX, TXT, or MD file.');
 
       setProcessingProgress(30);
       setProcessingLabel('Analyzing materials with AI...');
