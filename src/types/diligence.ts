@@ -33,6 +33,8 @@ export interface PositioningData {
   innovation: number;
   marketFit: number;
   isTarget?: boolean;
+  category?: string;
+  rationale?: string;
 }
 
 export interface GTMDecision {
