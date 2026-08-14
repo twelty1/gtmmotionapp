@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import * as mammoth from 'mammoth/mammoth.browser';
 import { GlobalWorkerOptions, getDocument } from 'pdfjs-dist/legacy/build/pdf.mjs';
-import pdfWorkerUrl from 'pdfjs-dist/legacy/build/pdf.worker.min.mjs?url';
+import PdfWorker from 'pdfjs-dist/legacy/build/pdf.worker.min.mjs?worker';
+
 import { cn } from '@/lib/utils';
 import { FileUploadZone } from '@/components/FileUploadZone';
 import { BusinessModelToggle } from '@/components/BusinessModelToggle';
@@ -32,7 +33,7 @@ import {
 } from 'lucide-react';
 import type { UploadedFile, DiligenceReport, BusinessModel } from '@/types/diligence';
 
-GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
+GlobalWorkerOptions.workerPort = new PdfWorker();
 
 const Index = () => {
   const [files, setFiles] = useState<UploadedFile[]>([]);
@@ -68,8 +69,15 @@ const Index = () => {
         const content = await page.getTextContent();
         pages.push(content.items.map((item) => ('str' in item ? item.str : '')).join(' '));
       }
-      return pages.join('\n\n');
+      const text = pages.join('\n\n');
+      if (!text.trim()) {
+        throw new Error(
+          `${file.name} appears to be image-only (scanned or exported slides) with no selectable text.`
+        );
+      }
+      return text;
     }
+
 
     if (extension === 'docx') {
       const result = await mammoth.extractRawText({ arrayBuffer: await file.arrayBuffer() });
