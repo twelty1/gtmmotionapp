@@ -136,6 +136,8 @@ The sections MUST include exactly these 10 items grouped into 3 categories:
 **Traction** (1 section):
 10. "traction-industry-validation" - Industry Validation: Recommend specific validation tactics (awards, analyst coverage, partnerships).
 
+- positioning MUST contain the target company (isTarget: true) PLUS 4-6 REAL, NAMED competitors that actually exist in this company's market (use your industry knowledge and any competitors named in the materials — never placeholders like "Competitor A"). Spread them realistically across quadrants and give each a concrete rationale referencing what that company is known for.
+
 - businessModelFlow MUST have 4-6 stages showing the end-to-end business model flow. Start with "source" stages (where customers/value come from), then "process" stages (how value is delivered), then "revenue" stages (how money is made). Must include 1-4 revenueStreams with estimated percentage splits summing to 100.
 - riskyStrategies MUST include 4-6 unconventional, high-risk GTM tactics that are NOT part of the main strategy. Think guerrilla marketing, mass UGC creator campaigns, billboards, viral stunts, controversial PR, community takeovers, event ambush marketing, etc. These should be creative and out-of-the-box ideas with honest risk assessment. Mix riskLevels across "high", "very-high", and "extreme".
 - Use "risk" status when data suggests a problem that needs fixing, NOT when data is simply absent
