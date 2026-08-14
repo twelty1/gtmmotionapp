@@ -69,8 +69,15 @@ const Index = () => {
         const content = await page.getTextContent();
         pages.push(content.items.map((item) => ('str' in item ? item.str : '')).join(' '));
       }
-      return pages.join('\n\n');
+      const text = pages.join('\n\n');
+      if (!text.trim()) {
+        throw new Error(
+          `${file.name} appears to be image-only (scanned or exported slides) with no selectable text.`
+        );
+      }
+      return text;
     }
+
 
     if (extension === 'docx') {
       const result = await mammoth.extractRawText({ arrayBuffer: await file.arrayBuffer() });
