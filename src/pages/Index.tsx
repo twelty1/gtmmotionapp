@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import * as mammoth from 'mammoth/mammoth.browser';
 import { GlobalWorkerOptions, getDocument } from 'pdfjs-dist/legacy/build/pdf.mjs';
-import pdfWorkerUrl from 'pdfjs-dist/legacy/build/pdf.worker.min.mjs?url';
+import PdfWorker from 'pdfjs-dist/legacy/build/pdf.worker.min.mjs?worker';
+
 import { cn } from '@/lib/utils';
 import { FileUploadZone } from '@/components/FileUploadZone';
 import { BusinessModelToggle } from '@/components/BusinessModelToggle';
