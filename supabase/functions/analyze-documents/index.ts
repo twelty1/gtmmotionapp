@@ -68,7 +68,7 @@ Your output MUST be valid JSON matching this exact schema (no markdown, no code 
     }
   ],
   "customerSegments": [{"name": "string", "percentage": number, "urgency": "high"|"medium"|"low"}],
-  "positioning": [{"company": "string", "innovation": number 0-100, "marketFit": number 0-100, "isTarget": boolean}],
+  "positioning": [{"company": "string - REAL, named company", "innovation": number 0-100, "marketFit": number 0-100, "isTarget": boolean, "category": "string - one of 'Leader' | 'Incumbent' | 'Disruptor' | 'Early Stage'", "rationale": "string - 1-2 sentences explaining why this company sits at these coordinates vs the target company"}],
   "gtmDecisions": [{"factor": "string", "pushScore": number 0-100, "pullScore": number 0-100}],
   "disruptionScore": number 0-100,
   "acquisitionFunnel": [{"name": "string", "value": number, "percentage": number, "tactic": "string - 1 sentence describing the specific tactic/action at this stage", "channels": ["string array - 2-3 specific channels or tools to use at this stage"]}],
