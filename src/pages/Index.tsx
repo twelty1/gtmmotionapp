@@ -33,7 +33,7 @@ import {
 } from 'lucide-react';
 import type { UploadedFile, DiligenceReport, BusinessModel } from '@/types/diligence';
 
-GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
+GlobalWorkerOptions.workerPort = new PdfWorker();
 
 const Index = () => {
   const [files, setFiles] = useState<UploadedFile[]>([]);
