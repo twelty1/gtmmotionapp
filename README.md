@@ -1,73 +1,60 @@
-# Welcome to your Lovable project
+# GTM Motion Generator
 
-## Project info
+Build a venture capital diligence and GTM analysis platform.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+Core function:
+Create an upload area that accepts multiple inputs including pitch decks, memos, notes, transcripts, and documents. After upload, wait for full ingestion, then automatically generate a structured GTM and product market fit analysis.
 
-## How can I edit this code?
+Output a Due Diligence dashboard focused on Value Proposition with the following sections:
+• Customer pain and urgency
+• Customer segmentation and ICP clarity
+• Better vs faster vs cheaper differentiation
+• Incremental vs disruptive positioning
+• Platform vs focused product strategy
+• Push vs pull GTM motion
 
-There are several ways of editing your application.
+For each section:
+• Summarize insights from uploaded materials
+• Identify gaps, risks, and unanswered questions
+• Propose a recommended GTM motion aligned to evidence
+• Flag assumptions vs validated signals
 
-**Use Lovable**
+Visuals:
+• Graphs for segmentation breakdowns
+• Positioning map versus incumbents
+• Push vs pull GTM decision chart
+• Incremental vs disruptive spectrum
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+UX:
+• Clear checklist style with pass risk unclear indicators
+• Expandable sections with concise investor language
+• Ability to regenerate GTM ideas when new files are added
 
-Changes made via Lovable will be committed automatically to this repo.
+Goal:
+Help an investment team quickly assess PMF strength and design a credible GTM strategy based only on provided materials.
 
-**Use your preferred IDE**
+Tone:
+Investor grade, analytical, no fluff.
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+This project was built with [Lovable](https://lovable.dev).
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+**Live app**: https://gtmmotionapp.lovable.app
 
-Follow these steps:
+## Build with Lovable
+
+Continue developing this project in the [Lovable editor](https://lovable.dev/projects/f42e8ea1-c42d-41ee-9436-f32127b68031).
+
+- **Ship faster**: describe what you want to build and Lovable handles the code.
+- **Stay in sync**: every change made in Lovable is committed straight to this repository.
+- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+
+## Development
+
+Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
+git clone <this-repository-url>
+cd <repository-name>
 npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
 ```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
